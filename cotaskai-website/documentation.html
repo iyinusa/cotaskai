@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - CoTaskAI</title>
+    <meta name="description" content="Documentation for CoTaskAI browser extension - Installation, usage, and customization guides.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-tomorrow.min.css">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        .docs-page {
+            padding: 120px 0 80px;
+        }
+        
+        .docs-container {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .docs-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 100px;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        
+        .docs-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .docs-sidebar > ul > li {
+            margin-bottom: 20px;
+        }
+        
+        .docs-sidebar-category {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .docs-sidebar-link {
+            display: block;
+            padding: 6px 0;
+            color: var(--gray-dark);
+            font-size: 0.95rem;
+            border-left: 2px solid transparent;
+            padding-left: 15px;
+            margin-left: -15px;
+        }
+        
+        .docs-sidebar-link:hover {
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .docs-sidebar-link.active {
+            color: var(--primary);
+            font-weight: 500;
+            border-left-color: var(--primary);
+        }
+        
+        .docs-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .docs-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .docs-content h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .docs-content h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .docs-content p, .docs-content ul, .docs-content ol {
+            margin-bottom: 20px;
+            color: var(--gray-dark);
+        }
+        
+        .docs-content ul, .docs-content ol {
+            padding-left: 20px;
+        }
+        
+        .docs-content li {
+            margin-bottom: 8px;
+        }
+        
+        .docs-content img {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .code-block {
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .note-box {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background-color: rgba(249, 115, 22, 0.1);
+            border-left: 4px solid #f97316;
+            padding: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 992px) {
+            .docs-container {
+                flex-direction: column;
+            }
+            
+            .docs-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/favicon.svg" alt="CoTaskAI Logo">
+                    <span>CoTaskAI</span>
+                </a>
+                
+                <div class="nav-links">
+                    <a href="index.html#features">Features</a>
+                    <a href="index.html#how-it-works">How It Works</a>
+                    <a href="index.html#use-cases">Use Cases</a>
+                    <a href="index.html#privacy">Privacy</a>
+                    <a href="index.html#faq">FAQ</a>
+                    <a href="https://github.com/iyinusa/cotaskai" target="_blank" class="github-link">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                </div>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Documentation Page -->
+    <section class="docs-page">
+        <div class="container">
+            <div class="docs-container">
+                <!-- Sidebar -->
+                <div class="docs-sidebar">
+                    <ul>
+                        <li>
+                            <span class="docs-sidebar-category">Getting Started</span>
+                            <ul>
+                                <li><a href="#introduction" class="docs-sidebar-link active">Introduction</a></li>
+                                <li><a href="#installation" class="docs-sidebar-link">Installation</a></li>
+                                <li><a href="#quick-start" class="docs-sidebar-link">Quick Start Guide</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <span class="docs-sidebar-category">Core Features</span>
+                            <ul>
+                                <li><a href="#text-analysis" class="docs-sidebar-link">Text Analysis</a></li>
+                                <li><a href="#web-search" class="docs-sidebar-link">Web Search Assistant</a></li>
+                                <li><a href="#summarization" class="docs-sidebar-link">Content Summarization</a></li>
+                                <li><a href="#translation" class="docs-sidebar-link">Translation</a></li>
+                                <li><a href="#qa" class="docs-sidebar-link">Question Answering</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <span class="docs-sidebar-category">Advanced Usage</span>
+                            <ul>
+                                <li><a href="#custom-prompts" class="docs-sidebar-link">Custom Prompts</a></li>
+                                <li><a href="#keyboard-shortcuts" class="docs-sidebar-link">Keyboard Shortcuts</a></li>
+                                <li><a href="#context-menu" class="docs-sidebar-link">Context Menu Features</a></li>
+                                <li><a href="#settings" class="docs-sidebar-link">Settings & Configuration</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <span class="docs-sidebar-category">Privacy & Security</span>
+                            <ul>
+                                <li><a href="#data-handling" class="docs-sidebar-link">Data Handling</a></li>
+                                <li><a href="#permissions" class="docs-sidebar-link">Browser Permissions</a></li>
+                                <li><a href="#security" class="docs-sidebar-link">Security Measures</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <span class="docs-sidebar-category">Development</span>
+                            <ul>
+                                <li><a href="#architecture" class="docs-sidebar-link">Architecture</a></li>
+                                <li><a href="#contributing" class="docs-sidebar-link">Contributing</a></li>
+                                <li><a href="#building" class="docs-sidebar-link">Building from Source</a></li>
+                                <li><a href="#api" class="docs-sidebar-link">API Reference</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li>
+                            <span class="docs-sidebar-category">Troubleshooting</span>
+                            <ul>
+                                <li><a href="#common-issues" class="docs-sidebar-link">Common Issues</a></li>
+                                <li><a href="#support" class="docs-sidebar-link">Getting Support</a></li>
+                                <li><a href="#faq" class="docs-sidebar-link">FAQ</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="docs-content">
+                    <h1 id="introduction">CoTaskAI Documentation</h1>
+                    
+                    <p>Welcome to the CoTaskAI documentation. This guide will help you understand how to install, configure, and make the most of the CoTaskAI browser extension.</p>
+                    
+                    <h2 id="installation">Installation</h2>
+                    
+                    <p>CoTaskAI is available for major browsers through their respective extension stores:</p>
+                    
+                    <h3>Chrome</h3>
+                    <ol>
+                        <li>Visit the <a href="https://chrome.google.com/webstore/detail/cotaskai/" target="_blank">Chrome Web Store</a></li>
+                        <li>Click "Add to Chrome"</li>
+                        <li>Confirm the installation when prompted</li>
+                    </ol>
+                    
+                    <h3>Firefox</h3>
+                    <ol>
+                        <li>Visit the <a href="https://addons.mozilla.org/en-US/firefox/addon/cotaskai/" target="_blank">Firefox Add-ons Store</a></li>
+                        <li>Click "Add to Firefox"</li>
+                        <li>Confirm the installation when prompted</li>
+                    </ol>
+                    
+                    <h3>Edge</h3>
+                    <ol>
+                        <li>Visit the <a href="https://microsoftedge.microsoft.com/addons/detail/cotaskai/" target="_blank">Edge Add-ons Store</a></li>
+                        <li>Click "Get"</li>
+                        <li>Confirm the installation when prompted</li>
+                    </ol>
+                    
+                    <h3>Manual Installation (Developer Mode)</h3>
+                    
+                    <p>For advanced users who want to install the extension manually or for development purposes:</p>
+                    
+                    <div class="code-block">
+                        <pre><code class="language-bash">
+# Clone the repository
+git clone https://github.com/iyinusa/cotaskai.git
+
+# Navigate to the project directory
+cd extension
+
+# Install dependencies
+npm install
+
+# Build the extension
+npm run build
+                        </code></pre>
+                    </div>
+                    
+                    <p>Then follow these steps to install locally:</p>
+                    
+                    <ol>
+                        <li>Open your browser's extension management page:
+                            <ul>
+                                <li>Chrome: chrome://extensions</li>
+                                <li>Edge: edge://extensions</li>
+                                <li>Firefox: about:debugging#/runtime/this-firefox</li>
+                            </ul>
+                        </li>
+                        <li>Enable Developer Mode</li>
+                        <li>Click "Load unpacked" (or "Load temporary add-on" in Firefox)</li>
+                        <li>Select the "dist" folder from the build output</li>
+                    </ol>
+                    
+                    <div class="note-box">
+                        <strong>Note:</strong> Manual installation requires the extension to be reloaded after browser restarts in development mode.
+                    </div>
+                    
+                    <h2 id="quick-start">Quick Start Guide</h2>
+                    
+                    <p>Once installed, you can start using CoTaskAI right away:</p>
+                    
+                    <ol>
+                        <li><strong>Access the extension:</strong> Click the CoTaskAI icon in your browser's toolbar</li>
+                        <li><strong>Select text on any webpage:</strong> Highlight text to analyze it</li>
+                        <li><strong>Use the context menu:</strong> Right-click on selected text to access quick actions</li>
+                        <li><strong>Ask questions:</strong> Use the extension popup to ask questions about the current page</li>
+                    </ol>
+                    
+                    <img src="assets/demo.gif" alt="CoTaskAI Demo" class="docs-image">
+                    
+                    <h2 id="text-analysis">Text Analysis</h2>
+                    
+                    <p>CoTaskAI can analyze selected text in various ways:</p>
+                    
+                    <h3>How to use:</h3>
+                    <ol>
+                        <li>Select any text on a webpage</li>
+                        <li>Right-click and choose "Analyze with CoTaskAI" or use the keyboard shortcut (Ctrl+Shift+A)</li>
+                        <li>Choose the analysis type from the dropdown menu</li>
+                    </ol>
+                    
+                    <h3>Available analysis types:</h3>
+                    <ul>
+                        <li><strong>Summarize:</strong> Create a concise summary of the text</li>
+                        <li><strong>Explain:</strong> Get a simplified explanation of complex content</li>
+                        <li><strong>Find key points:</strong> Extract the main points from the text</li>
+                        <li><strong>Check facts:</strong> Verify factual claims in the text</li>
+                        <li><strong>Translate:</strong> Convert text to another language</li>
+                    </ul>
+                    
+                    <div class="warning-box">
+                        <strong>Important:</strong> Text analysis features work best with moderate amounts of text (up to a few paragraphs). For longer content, consider using the summarization feature first.
+                    </div>
+                    
+                    <!-- Continue with more documentation sections -->
+                    <h2 id="web-search">Web Search Assistant</h2>
+                    <p>CoTaskAI can enhance your web searches by providing contextual information and additional insights:</p>
+                    
+                    <h3>Features:</h3>
+                    <ul>
+                        <li><strong>Search suggestions:</strong> Get better search queries based on your initial search</li>
+                        <li><strong>Result enhancement:</strong> See additional context for search results</li>
+                        <li><strong>Quick answers:</strong> Get immediate answers for factual questions</li>
+                    </ul>
+
+                    <!-- More sections would continue here... -->
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>CoTaskAI</h3>
+                    <p>AI-powered browser assistant designed to help you complete tasks more efficiently by analysing your browsing contents.</p>
+                    <div class="social-links">
+                        <a href="https://github.com/iyinusa/cotaskai"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="documentation.html">Documentation</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="https://github.com/iyinusa/cotaskai">GitHub</a></li>
+                        <li><a href="changelog.html">Changelog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="careers.html">Careers</a></li>
+                        <li><a href="media.html">Media</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="cookies.html">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 CoTaskAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-javascript.min.js"></script>
+</body>
+</html>

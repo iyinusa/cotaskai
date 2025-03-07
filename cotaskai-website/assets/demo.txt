@@ -1,0 +1,9 @@
+Please create an actual demo.gif file showing CoTaskAI browser extension in action with the following key features:
+
+1. Opening the extension on a webpage
+2. Highlighting text and analyzing it
+3. Asking a question about the page content
+4. Showing the AI responding with relevant information
+
+The ideal dimensions would be 800px width and height appropriate to maintain aspect ratio.
+Save this as demo.gif in the assets folder.

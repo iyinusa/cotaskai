@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoTaskAI - AI-Powered Browser Assistant</title>
+    <meta name="description" content="CoTaskAI is an AI browser extension that enhances your web browsing experience by providing intelligent assistance across various tasks and websites.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="assets/images/favicon.png" type="image/svg+xml">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/images/logo.png" alt="CoTaskAI Logo">
+                </a>
+                
+                <div class="nav-links">
+                    <a href="#features">Feature</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#use-cases">Use Cases</a>
+                    <a href="#privacy">Privacy</a>
+                    <a href="#testimonials">Testimonials</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="https://github.com/iyinusa/cotaskai" target="_blank" class="github-link">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                </div>
+                
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero container">
+        <div class="hero-content fade-in">
+            <h1>Your Intelligent Web Assistant</h1>
+            <p class="hero-subtitle">Transform the way you interact with online content. Get instant, context-aware insights
+                powered by advanced AI - right in your browser.</p>
+            <div class="cta-buttons">
+                <a href="https://chrome.google.com/webstore" class="cta-primary">
+                    <i class="fab fa-chrome"></i> Add to Chrome
+                </a>
+                <a href="#features" class="cta-secondary">Learn More &nbsp;<i class="fa fa-arrow-down"></i></a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="assets/images/research.png" alt="CoTaskAI in action">
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title fade-in">Powerful Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Smart Research Assistant</h3>
+                    <p>Quickly analyse content, summarise articles, and extract key information from any webpage you visit.</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Privacy-Focused</h3>
+                    <p>Your data stays local by default. Only the content you explicitly select is processed for AI analysis.</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Contextual Conversations</h3>
+                    <p>Ask questions about web content and get answers directly related to what you're viewing.</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3>Task Automation</h3>
+                    <p>Generate emails, summarise meetings, format code snippets, and more with simple prompts.</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h3>Customisable AI Providers</h3>
+                    <p>Connect to your preferred AI service or use your own API keys for complete control.</p>
+                </div>
+                
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Open Source</h3>
+                    <p>Transparent codebase that can be audited, modified, and improved by the community.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title fade-in">How It Works</h2>
+            <div class="steps">
+                <div class="step fade-in">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Install the Extension</h3>
+                        <p>Add CoTaskAI to your browser with just a click. Available for Chrome, coming soon for Firefox, and Edge.</p>
+                    </div>
+                </div>
+                
+                <div class="step fade-in">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Browse Normally</h3>
+                        <p>CoTaskAI runs silently in the background, ready to assist when needed without disrupting your workflow.</p>
+                    </div>
+                </div>
+                
+                <div class="step fade-in">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Just Ask Questions</h3>
+                        <p>On the current web page tab, just click the extension icon to ask questions about the page content.</p>
+                    </div>
+                </div>
+                
+                <div class="step fade-in">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Get Instant AI Assistance</h3>
+                        <p>Receive context-aware responses, summaries, insights, or task help based on what you're doing.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-container fade-in">
+                <img src="assets/images/research.png" alt="CoTaskAI Demo" class="demo-gif">
+            </div>
+        </div>
+    </section>
+    
+    <!-- Use Cases Section -->
+    <section class="use-cases" id="use-cases">
+        <div class="container">
+            <h2 class="section-title fade-in">Perfect For Everyone</h2>
+            <div class="use-cases-grid">
+                <div class="use-case-card fade-in" data-aos="flip-left">
+                    <img src="assets/images/student.png" alt="Students">
+                    <h3>Students</h3>
+                    <p>Get help understanding complex topics, summarizing articles, and researching for assignments.</p>
+                </div>
+                
+                <div class="use-case-card fade-in" data-aos="flip-left" data-aos-delay="100">
+                    <img src="assets/images/professional.png" alt="Professionals">
+                    <h3>Professionals</h3>
+                    <p>Boost productivity with quick information retrieval, data analysis, and task assistance.</p>
+                </div>
+                
+                <div class="use-case-card fade-in" data-aos="flip-left" data-aos-delay="200">
+                    <img src="assets/images/researcher.png" alt="Researchers">
+                    <h3>Researchers</h3>
+                    <p>Analyze papers, extract key insights, and connect information across different sources.</p>
+                </div>
+                
+                <div class="use-case-card fade-in" data-aos="flip-left" data-aos-delay="300">
+                    <img src="assets/images/casual.png" alt="Casual Users">
+                    <h3>Casual Users</h3>
+                    <p>Get quick answers, shopping advice, entertainment recommendations, and general assistance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Privacy Section -->
+    <section class="privacy" id="privacy">
+        <div class="container">
+            <h2 class="section-title fade-in">Privacy By Design</h2>
+            <div class="privacy-content">
+                <div class="privacy-info fade-in">
+                    <h3>Your Data Stays On Your Device</h3>
+                    <p>CoTaskAI was built with privacy as a core principle. Unlike other AI assistants, we process content locally whenever possible and never store your browsing history or personal data.</p>
+                    <ul class="privacy-list">
+                        <li><i class="fas fa-check-circle"></i> No tracking or monitoring of your browsing</li>
+                        <li><i class="fas fa-check-circle"></i> Local processing for sensitive information</li>
+                        <li><i class="fas fa-check-circle"></i> Transparent about what data is used</li>
+                        <li><i class="fas fa-check-circle"></i> Open-source code for full transparency</li>
+                        <li><i class="fas fa-check-circle"></i> Control what context is shared with AI</li>
+                    </ul>
+                    <a href="privacy.html" class="cta-secondary mt-3">Learn More About Privacy</a>
+                </div>
+                <div class="privacy-image fade-in">
+                    <img src="assets/images/privacy.png" alt="Privacy First Approach">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <h2 class="section-title fade-in">What Users Are Saying</h2>
+            <p class="text-center fade-in mb-4">See how CoTaskAI is transforming workflows for professionals around the
+                world.</p>
+    
+            <div class="testimonial-grid">
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-content">
+                        <p>"CoTaskAI has completely changed how I research topics online. I used to spend hours compiling
+                            information from different sources - now I can get concise summaries and analyses in seconds.
+                            It's like having a research assistant right in my browser!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="assets/images/avatar.png" alt="Emily Zhen" class="testimonial-author-image">
+                        <div class="testimonial-author-info">
+                            <h4>Emily Zhen</h4>
+                            <p>Researcher</p>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="testimonial-card fade-in" data-aos-delay="100">
+                    <div class="testimonial-content">
+                        <p>"As a developer, I'm constantly looking up documentation and code examples. CoTaskAI helps me
+                            understand complex programming concepts faster by providing clear explanations tailored to my
+                            context. It's significantly improved my productivity."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="assets/images/avatar.png" alt="Kennedy Yinusa" class="testimonial-author-image">
+                        <div class="testimonial-author-info">
+                            <h4>Kennedy Yinusa</h4>
+                            <p>Software Engineer</p>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="testimonial-card fade-in" data-aos-delay="200">
+                    <div class="testimonial-content">
+                        <p>"I use CoTaskAI daily for my marketing research. The ability to quickly analyze competitor
+                            content and generate insights has given us a competitive edge. Plus, the privacy features mean I
+                            don't have to worry about sensitive business data."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="assets/images/avatar.png" alt="Loral James" class="testimonial-author-image">
+                        <div class="testimonial-author-info">
+                            <h4>Loral James</h4>
+                            <p>Marketing Director</p>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title fade-in">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item fade-in">
+                    <div class="faq-question">
+                        <h3>Is CoTaskAI free to use?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, CoTaskAI is completely free and open-source. We believe in making AI assistance accessible to everyone without hidden costs or premium features.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <div class="faq-question">
+                        <h3>What browsers are supported?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>CoTaskAI currently supports Chrome, Firefox, and Edge browsers. We're working on adding support for Safari in the near future.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <div class="faq-question">
+                        <h3>How does CoTaskAI protect my privacy?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>CoTaskAI processes information locally when possible. When AI processing is needed, only the specific content you select is sent to the AI service, never your browsing history or personal data. All transmissions are encrypted and we don't store your queries or results.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <div class="faq-question">
+                        <h3>Does CoTaskAI work on all websites?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, CoTaskAI is designed to work with any website. However, some websites with unusual structures or heavy JavaScript might have limited functionality. We continuously improve compatibility with different websites.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <div class="faq-question">
+                        <h3>Can I contribute to the project?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! CoTaskAI is open-source and we welcome contributions. Visit our GitHub repository to learn how you can help improve the extension or report issues.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content fade-in">
+                <h2>Ready to Boost Your Productivity?</h2>
+                <p>Join thousands of users who are already using CoTaskAI to make their browsing experience smarter and more efficient.</p>
+                <div class="cta-buttons">
+                    <a href="#" class="cta-primary">
+                        <i class="fas fa-download"></i> Add to Chrome
+                    </a>
+                    <a href="#" class="cta-secondary">
+                        <i class="fab fa-firefox"></i> Add to Firefox
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>CoTaskAI</h3>
+                    <p>AI-powered browser assistant designed to help you complete tasks more efficiently by analysing your browsing contents.</p>
+                    <div class="social-links">
+                        <a href="https://github.com/iyinusa/cotaskai"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/iyinusa/cotaskai">GitHub</a></li>
+                        <li><a href="javascript:;">Changelog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="javascript:;">About Us</a></li>
+                        <li><a href="javascript:;">Careers</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 CoTaskAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

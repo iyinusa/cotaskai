@@ -1,0 +1,191 @@
+html, body {
+    width: 450px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: linear-gradient(-45deg, #01035b, #01035b, #666666, #01035b);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.logo {
+    width: 100px;
+    max-width: 100%;
+    margin: 15px;
+}
+
+.box {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px 15px 0px 0px;
+    border-top: 1px solid #cccccc;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid #ddd;
+}
+.nav-tabs li:first-child a {
+    border-radius: 15px 0px 0px 0px;
+}
+.nav-tabs li.active {
+    border-bottom: 1px solid #13125a;
+}
+.nav-tabs li a {
+    color: #999;
+    padding: 15px 35px;
+}
+.nav-tabs li.active a {
+    border: none;
+    color: #13125a;
+    font-weight: bold;
+}
+
+#prompt, #prompt:focus {
+    overflow: hidden;
+    resize: none;
+    padding: 15px;
+    border: none;
+    box-shadow: none;
+    border-radius: 5px 5px 0px 0px;
+}
+
+#modelThinking {
+    display: none;
+    font-weight: bold;
+    padding: 10px;
+    color: #999;
+}
+
+.message {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 80%;
+}
+
+.message.prompt {
+    background: #ddd;
+    margin-left: auto;
+}
+
+.message.response {
+    background: #f2f2f2;
+    margin-right: auto;
+}
+
+.message-header { 
+    font-size: 10px;
+    font-weight: bold;
+    color: #999;
+}
+
+.message.error {
+    background: #ffebee;
+    color: #b71c1c;
+}
+
+.empty-message {
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    height: 100%;
+    color: #777;
+    font-size: 1.2em;
+    padding: 20px;
+}
+.empty-message img {
+    width: 50px;
+}
+.empty-message p {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.empty-message .disclaimer {
+    font-size: 0.8em;
+    color: #999;
+
+}
+
+.message.system {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+#chat-history {
+    height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.model-selector {
+    background-color: #fff;
+    padding: 10px;
+    padding-top: 0px;
+}
+.model-selector #modelSelect {
+    background-color: #f6f6f6;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #eee;
+} */
+
+#settingTab {
+    padding: 15px;
+}
+#settingTab h2 {
+    color: #ccc;
+    font-size: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+#settingTab fieldset {
+    margin-bottom: 15px;
+}
+#settingTab legend {
+    color: #999;
+    font-size: 14px;
+    border: none;
+    margin-bottom: 10px;
+}
+#settingTab input, #settingTab input:focus {
+    margin: none;
+    box-shadow: none;
+    border: none;
+}
+#settingTab #save-settings {
+    padding: 15px 35px;
+    text-transform: uppercase;
+}
+
+.dark-mode {
+    background: #1a1a1a;
+    color: white;
+}
+
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}

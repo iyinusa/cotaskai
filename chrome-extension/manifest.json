@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "CoTaskAI",
+    "author": "I. Kennedy Yinusa",
+    "description": "LLM on your browser. CoTaskAI helps you to talk to your browsing contents, summarize, and generate ideas.",
+    "version": "1.0",
+    "permissions": [
+        "contextMenus",
+        "activeTab",
+        "storage",
+        "scripting",
+        "notifications"
+    ],
+    "host_permissions": [
+        "https://api.openai.com/*"
+    ],
+    "action": {
+        "default_title": "CoTaskAI",
+        "default_popup": "popup.html",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content-script.js"
+            ]
+        }
+    ],
+    "options_page": "options.html"
+}

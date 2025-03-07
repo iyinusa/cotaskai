@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>CoTaskAI</title>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <img src="images/logo.png" alt="" class="logo">
+            </div>
+
+            <div class="box">
+                <div class="tabs">
+                    <ul class="nav nav-tabs">
+                        <li class="tablinks active"><a href="#chatTab">Dialogue</a></li>
+                        <li class="tablinks"><a href="#settingTab">Settings</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="chatTab" class="tab-pane fade in active">
+                            <div id="chat">
+                                <!-- Dialogue History -->
+                                <div id="chat-history"></div>
+
+                                <!-- Model Thinking... -->
+                                 <div id="modelThinking"></div>
+
+                                <!-- User Prompt Input -->
+                                <textarea class="form-control" id="prompt" rows="1" placeholder="Prompt / Instruct CoTaskAI" autofocus></textarea>
+
+                                <!-- Model Selector -->
+                                <div class="model-selector">
+                                    <select id="modelSelect">
+                                        <optgroup label="OpenAI Models">
+                                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                            <option value="gpt-4">GPT-4</option>
+                                            <option value="gpt-4o">GPT-4o</option>
+                                            <option value="o1-mini">o1 Mini</option>
+                                            <option value="o3-mini">o3 Mini</option>
+                                        </optgroup>
+
+                                        <optgroup label="Gemini Models"></optgroup>
+
+                                        <optgroup label="DeepSeek Models"></optgroup>
+
+                                        <optgroup label="xAI Models"></optgroup>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div id="settingTab" class="tab-pane fade in">
+                            <h2>SETTINGS</h2>
+                            
+                            <!-- OpenAPI Key -->
+                            <fieldset>
+                                <legend>OpenAI API Key</legend>
+                                <input type="text" id="openAIKey" class="form-control" placeholder="Enter OpenAI API Key">
+                            </fieldset>
+
+                            <!-- Gemini Key -->
+                            <fieldset>
+                                <legend>Gemini API Key</legend>
+                                <input type="text" id="geminiKey" class="form-control" placeholder="Coming soon..." disabled> 
+                            </fieldset>
+
+                            <!-- DeepSeek Key -->
+                            <fieldset>
+                                <legend>DeepSeek API Key</legend>
+                                <input type="text" id="deepSeekKey" class="form-control" placeholder="Coming soon..." disabled>
+                            </fieldset>
+
+                            <!-- xAI Key -->
+                            <fieldset>
+                                <legend>xAI API Key</legend>
+                                <input type="text" id="xAIKey" class="form-control" placeholder="Coming soon..." disabled>
+                            </fieldset>
+
+                            <div class="text-center">
+                                <hr>
+                                <button id="save-settings" class="btn btn-default">Save Settings</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/format-helper.js"></script>
+    <script src="js/popup.js"></script>
+    <script src="js/pdf/pdf.min.js"></script>
+    <!-- <script src="https://unpkg.com/pdfjs-dist@2.6.347/build/pdf.min.js"></script> -->
+    <!-- <script src="https://unpkg.com/mammoth@1.4.8/mammoth.browser.min.js"></script> -->
+</body>
+
+</html>
