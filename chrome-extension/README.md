@@ -5,11 +5,12 @@
   
   <p>LLM power directly in your browser — analyze, summarize, and generate ideas from web content.</p>
 
-  <p><img src="images/research.png" alt="CoTaskAI Demo" width="100%"></p>
-  
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
   [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/yourusername/cotaskai)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+  
+  <p><img src="images/research.png" alt="CoTaskAI Demo" width="100%"></p>
+  
 </div>
 
 ## 🌟 Features
