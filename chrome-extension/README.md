@@ -14,7 +14,7 @@
 
 - **Content Analysis**: Analyze any webpage or PDF document directly in your browser
 - **Contextual Understanding**: AI understands the content you're viewing for relevant responses
-- **Multiple AI Models**: Choose between OpenAI's models (GPT-3.5, GPT-4, GPT-4o, o1-mini, o3-mini)
+- **Multiple AI Models**: Choose between OpenAI's models (GPT-3.5, GPT-4, GPT-4o, o1-mini, o3-mini), Gemini, xAI, DeepSeek, Anthropic, etc. coming soon...
 - **Conversation Persistence**: Conversations are saved per page for future reference
 - **Right-Click Integration**: Select text and ask CoTaskAI via context menu
 - **PDF Support**: Built-in PDF processing capability
@@ -83,6 +83,7 @@ CoTaskAI requires API keys to function:
    - GPT-4o
    - o1 Mini
    - o3 Mini
+   - Other models from Google, xAI, Anthropic, DeepSeek, coming soon....
 
 ## 💻 Development
 
@@ -118,7 +119,7 @@ cotaskai/chrome-extension/
 2. **Local Development**
    ```bash
    # Clone the repository
-   git clone https://github.com/yourusername/cotaskai.git
+   git clone https://github.com/iyinusa/cotaskai.git
    
    # Navigate to the extension directory
    cd cotaskai/chrome-extension
