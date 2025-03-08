@@ -87,3 +87,97 @@ CoTaskAI requires API keys to function:
 ## 💻 Development
 
 ### Project Structure
+```
+cotaskai/chrome-extension/
+├── css/
+│   ├── bootstrap.css     # Bootstrap styling framework
+│   └── styles.css        # Custom styles for the extension
+├── images/
+│   ├── icon.png          # Extension icon
+│   └── logo.png          # CoTaskAI logo
+├── js/
+│   ├── bootstrap.js      # Bootstrap JavaScript
+│   ├── format-helper.js  # Formatting utilities for responses
+│   ├── jquery.js         # jQuery library
+│   ├── popup.js          # Main extension popup logic
+│   └── pdf/              # PDF processing libraries
+├── background.js         # Background service worker
+├── content-script.js     # Content script for webpage interaction
+├── manifest.json         # Extension manifest file
+├── options.html          # Extension options page
+├── popup.html            # Main extension popup
+└── README.md             # Documentation
+```
+
+### Development Setup
+
+1. **Prerequisites**
+   - Node.js and npm (for development tools)
+   - Chrome or compatible browser
+
+2. **Local Development**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/yourusername/cotaskai.git
+   
+   # Navigate to the extension directory
+   cd cotaskai/chrome-extension
+   
+   # Install development dependencies (if using npm)
+   npm install
+   ```
+
+3. **Testing**
+   - Load the extension in Chrome using Developer mode
+   - Make changes to the code
+   - Reload the extension from chrome://extensions to test changes
+
+4. **Building for Distribution**
+   - Remove any development-only files
+   - Create a ZIP file of the chrome-extension directory
+   - This ZIP file can be uploaded to the Chrome Web Store
+
+## 🤝 Contributing
+
+Contributions to CoTaskAI are welcome and appreciated! Here's how you can contribute:
+
+### Reporting Issues
+
+1. Check if the issue already exists in the [issues page](https://github.com/yourusername/cotaskai/issues)
+2. If not, open a new issue with a descriptive title and detailed description
+3. Include steps to reproduce, expected behavior, and actual behavior
+4. Add relevant screenshots if applicable
+
+### Pull Requests
+
+1. Fork the repository
+2. Create a new branch for your feature or fix
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. Make your changes with clear, descriptive commit messages
+4. Push your branch to your forked repository
+5. Open a pull request against the main repository
+6. Describe the changes and reference any related issues
+
+### Code Style Guidelines
+
+- Follow JavaScript standard style
+- Comment your code when logic is not immediately obvious
+- Test your changes thoroughly before submitting
+
+### Feature Requests
+
+Feature requests are welcome. Please provide:
+- Clear description of the feature
+- Why it would be useful to the project
+- Any implementation ideas you may have
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [OpenAI](https://openai.com/) for providing the API
+- All contributors who have helped improve this extension
