@@ -1,103 +1,267 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoTaskAI</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/animate.min.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/code-highlight.css">
+    <link rel="stylesheet" href="css/google-fonts.css">
 </head>
-
 <body>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <img src="images/logo.png" alt="" class="logo">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header animate__animated animate__fadeInDown">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="CoTaskAI Logo" class="logo">
             </div>
+            <div class="header-controls">
+                <button id="settingsBtn" class="icon-btn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button id="themeToggleBtn" class="icon-btn" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="floatingToggleBtn" class="icon-btn" title="Toggle Floating Button">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </header>
 
-            <div class="box">
-                <div class="tabs">
-                    <ul class="nav nav-tabs">
-                        <li class="tablinks active"><a href="#chatTab">Dialogue</a></li>
-                        <li class="tablinks"><a href="#settingTab">Settings</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div id="chatTab" class="tab-pane fade in active">
-                            <div id="chat">
-                                <!-- Dialogue History -->
-                                <div id="chat-history"></div>
+        <!-- Main Content -->
+        <main class="main-content animate__animated animate__fadeIn">
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <!-- Chat History -->
+                <div class="chat-history" id="chat-history">
+                </div>
 
-                                <!-- Model Thinking... -->
-                                 <div id="modelThinking"></div>
+                <!-- Model Thinking Animation -->
+                <div id="modelThinking">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                
+                <!-- Input Area -->
+                <div class="input-area redesigned">
+                    <div class="input-wrapper">
+                        <textarea id="prompt" class="input-box" placeholder="Type your message here..." rows="1"></textarea>
+                        <button id="sendBtn" class="send-btn redesigned" title="Send">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
 
-                                <!-- User Prompt Input -->
-                                <textarea class="form-control" id="prompt" rows="1" placeholder="Prompt / Instruct CoTaskAI" autofocus></textarea>
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="action-buttons">
+                <div class="model-selector-wrapper">
+                    <div class="model-selector">
+                        <select id="modelSelect">
+                            <optgroup label="OpenAI Models">
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-4o">GPT-4o</option>
+                                <option value="o1-mini">o1 Mini</option>
+                                <option value="o3-mini">o3 Mini</option>
+                            </optgroup>
+                            <optgroup label="Gemini Models">
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                            </optgroup>
+                            <optgroup label="Anthropic Models"></optgroup>
+                            <optgroup label="DeepSeek Models"></optgroup>
+                            <optgroup label="xAI Models"></optgroup>
+                        </select>
+                    </div>
+                </div>
+                <button id="clearChatBtn" class="text-btn">
+                    <i class="fas fa-trash-alt"></i> Clear Chat
+                </button>
+                <button id="exportChatBtn" class="text-btn">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+            <div class="version">v1.2</div>
+        </footer>
+    </div>
 
-                                <!-- Model Selector -->
-                                <div class="model-selector">
-                                    <select id="modelSelect">
-                                        <optgroup label="OpenAI Models">
-                                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                            <option value="gpt-4">GPT-4</option>
-                                            <option value="gpt-4o">GPT-4o</option>
-                                            <option value="o1-mini">o1 Mini</option>
-                                            <option value="o3-mini">o3 Mini</option>
-                                        </optgroup>
-
-                                        <optgroup label="Gemini Models"></optgroup>
-
-                                        <optgroup label="DeepSeek Models"></optgroup>
-
-                                        <optgroup label="xAI Models"></optgroup>
-                                    </select>
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content animate__animated animate__fadeInUp">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button class="close-btn" id="closeSettingsBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="settings-container">
+                <!-- Tab navigation -->
+                <div class="settings-nav">
+                    <button class="nav-item tablinks active" data-tab="apiKeys">
+                        <i class="fas fa-key"></i>
+                        <span>API Keys</span>
+                    </button>
+                    <button class="nav-item tablinks" data-tab="appearance">
+                        <i class="fas fa-palette"></i>
+                        <span>Appearance</span>
+                    </button>
+                    <button class="nav-item tablinks" data-tab="preferences">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Preferences</span>
+                    </button>
+                </div>
+                
+                <!-- Tab content container -->
+                <div class="settings-content">
+                    <!-- API Keys Tab -->
+                    <div id="apiKeys" class="tab-pane active">
+                        <div class="setting-section">
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">OpenAI</div>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="openAIKey" class="form-control" placeholder="Enter OpenAI API Key">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">Gemini</div>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="geminiKey" class="form-control" placeholder="Enter Gemini API Key">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">Anthropic</div>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="anthropicKey" class="form-control" placeholder="Enter Anthropic API Key">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">xAI</div>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="xaiKey" class="form-control" placeholder="Enter xAI API Key">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">DeepSeek</div>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="deepseekKey" class="form-control" placeholder="Enter DeepSeek API Key">
                                 </div>
                             </div>
                         </div>
+                    </div>
                     
-                        <div id="settingTab" class="tab-pane fade in">
-                            <h2>SETTINGS</h2>
+                    <!-- Appearance Tab -->
+                    <div id="appearance" class="tab-pane">
+                        <div class="setting-section">
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-paint-brush"></i>
+                                    <div class="setting-title">Theme</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="themeSelect" class="form-control">
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                        <option value="system">System Default</option>
+                                    </select>
+                                </div>
+                            </div>
                             
-                            <!-- OpenAPI Key -->
-                            <fieldset>
-                                <legend>OpenAI API Key</legend>
-                                <input type="text" id="openAIKey" class="form-control" placeholder="Enter OpenAI API Key">
-                            </fieldset>
-
-                            <!-- Gemini Key -->
-                            <fieldset>
-                                <legend>Gemini API Key</legend>
-                                <input type="text" id="geminiKey" class="form-control" placeholder="Coming soon..." disabled> 
-                            </fieldset>
-
-                            <!-- DeepSeek Key -->
-                            <fieldset>
-                                <legend>DeepSeek API Key</legend>
-                                <input type="text" id="deepSeekKey" class="form-control" placeholder="Coming soon..." disabled>
-                            </fieldset>
-
-                            <!-- xAI Key -->
-                            <fieldset>
-                                <legend>xAI API Key</legend>
-                                <input type="text" id="xAIKey" class="form-control" placeholder="Coming soon..." disabled>
-                            </fieldset>
-
-                            <div class="text-center">
-                                <hr>
-                                <button id="save-settings" class="btn btn-default">Save Settings</button>
+                            <div class="setting-item toggle-switch">
+                                <div class="setting-header">
+                                    <i class="fas fa-magic"></i>
+                                    <div class="setting-title">Enable Animations</div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="animationsToggle" class="toggle-input">
+                                    <label for="animationsToggle" class="toggle-label"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preferences Tab -->
+                    <div id="preferences" class="tab-pane">
+                        <div class="setting-section">
+                            <div class="setting-item toggle-switch">
+                                <div class="setting-header">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <div class="setting-title">Enable Floating Button</div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="floatingButtonToggle" class="toggle-input">
+                                    <label for="floatingButtonToggle" class="toggle-label"></label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item toggle-switch">
+                                <div class="setting-header">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <div class="setting-title">Auto-load Context</div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="autoContextToggle" class="toggle-input">
+                                    <label for="autoContextToggle" class="toggle-label"></label>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item toggle-switch">
+                                <div class="setting-header">
+                                    <i class="fas fa-bell"></i>
+                                    <div class="setting-title">Enable Notifications</div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="notificationsToggle" class="toggle-input">
+                                    <label for="notificationsToggle" class="toggle-label"></label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
+            
+            <div class="modal-footer">
+                <button class="secondary-btn" id="resetSettingsBtn">Reset</button>
+                <button id="save-settings" class="primary-btn">Save Settings</button>
+            </div>
         </div>
     </div>
 
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
+    <script src="js/marked.min.js"></script>
+    <script src="js/prism.min.js"></script>
     <script src="js/format-helper.js"></script>
+    <script src="js/dexie.min.js"></script>
+    <script src="js/database.js"></script>
     <script src="js/popup.js"></script>
     <script src="js/pdf/pdf.min.js"></script>
 </body>
-
 </html>

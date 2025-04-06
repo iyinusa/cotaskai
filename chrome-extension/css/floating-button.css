@@ -1,0 +1,173 @@
+.cotaskai-floating-button {
+    position: fixed;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #6366f1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 999999;
+    transition: transform 0.2s, box-shadow 0.2s;
+    right: 20px;
+    bottom: 20px;
+    user-select: none;
+    touch-action: none; /* Prevent default touch actions */
+}
+
+.cotaskai-floating-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.cotaskai-floating-button img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: contain;
+    pointer-events: none; /* Prevent image from interfering with dragging */
+}
+
+.cotaskai-floating-button.active {
+    background-color: #4f46e5;
+}
+
+.cotaskai-floating-button.dragging {
+    opacity: 0.8;
+    cursor: move;
+}
+
+/* Overlay modal styles */
+.cotaskai-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999998;
+    display: none;
+}
+
+.cotaskai-modal {
+    position: fixed;
+    width: 380px;
+    height: 600px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 999999;
+    overflow: hidden;
+    display: none;
+    animation: cotaskai-modal-in 0.3s ease;
+}
+
+@keyframes cotaskai-modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.cotaskai-modal-header {
+    height: 36px;
+    background-color: #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    cursor: move;
+    border-bottom: 1px solid #e5e7eb;
+    user-select: none;
+    touch-action: none;
+}
+
+.cotaskai-modal-title {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #4b5563;
+    pointer-events: none; /* Prevents interfering with dragging */
+}
+
+.cotaskai-close-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #6b7280;
+    font-size: 18px;
+    transition: background-color 0.2s;
+}
+
+.cotaskai-close-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.cotaskai-iframe {
+    width: 100%;
+    height: calc(100% - 36px);
+    border: none;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .cotaskai-floating-button {
+        background-color: #818cf8;
+    }
+    
+    .cotaskai-floating-button.active {
+        background-color: #6366f1;
+    }
+    
+    .cotaskai-modal {
+        background-color: #1f2937;
+    }
+    
+    .cotaskai-modal-header {
+        background-color: #111827;
+        border-bottom: 1px solid #374151;
+    }
+    
+    .cotaskai-modal-title {
+        color: #e5e7eb;
+    }
+    
+    .cotaskai-close-btn {
+        background-color: #374151;
+        color: #d1d5db;
+    }
+    
+    .cotaskai-close-btn:hover {
+        background-color: #4b5563;
+    }
+}
+
+/* Support for touch devices */
+@media (pointer: coarse) {
+    .cotaskai-floating-button {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .cotaskai-floating-button img {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .cotaskai-close-btn {
+        width: 32px;
+        height: 32px;
+    }
+}

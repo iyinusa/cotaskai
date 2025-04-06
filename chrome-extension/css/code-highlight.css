@@ -1,0 +1,92 @@
+/* Code block container */
+.code-block-container {
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+}
+
+/* Code header */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.code-language {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--secondary-text);
+  letter-spacing: 0.5px;
+}
+
+.copy-code-btn {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--secondary-text);
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-code-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.copy-code-btn.copied {
+  background-color: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+}
+
+/* Code block */
+.code-block {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background-color: var(--secondary-bg);
+}
+
+/* Inline code */
+.inline-code {
+  font-family: 'Fira Code', monospace;
+  background-color: var(--secondary-bg);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 90%;
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+}
+
+/* Markdown styling */
+.ai-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid var(--primary-color);
+  transition: all 0.2s ease;
+}
+
+.ai-list {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+blockquote {
+  border-left: 4px solid var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.1);
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 0 6px 6px 0;
+}

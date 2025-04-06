@@ -28,7 +28,23 @@
                 "<all_urls>"
             ],
             "js": [
-                "content-script.js"
+                "js/floating-button.js"
+            ],
+            "css": [
+                "css/floating-button.css"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "images/*",
+                "popup.html",
+                "css/*",
+                "js/*"
+            ],
+            "matches": [
+                "<all_urls>"
             ]
         }
     ],
