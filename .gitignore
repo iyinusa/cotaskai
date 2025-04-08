@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+
+# dexie directory - ignore completely
+dexie/
+/dexie/
+**/dexie/
+
+# Environments
+*.env
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
