@@ -98,7 +98,7 @@
         <div class="modal-content animate__animated animate__fadeInUp">
             <div class="modal-header">
                 <h3><i class="fas fa-cog"></i> Settings</h3>
-                <button class="close-btn" id="closeSettingsBtn">
+                <button class="close-btn close-modal" id="closeSettingsBtn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -129,6 +129,9 @@
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">OpenAI</div>
+                                    <a href="https://platform.openai.com/api-keys" target="_blank" class="api-link" title="Get OpenAI API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
                                 </div>
                                 <div class="setting-input">
                                     <input type="password" id="openAIKey" class="form-control" placeholder="Enter OpenAI API Key">
@@ -139,6 +142,9 @@
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">Gemini</div>
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link" title="Get Gemini API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
                                 </div>
                                 <div class="setting-input">
                                     <input type="password" id="geminiKey" class="form-control" placeholder="Enter Gemini API Key">
@@ -149,6 +155,9 @@
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">Anthropic</div>
+                                    <a href="https://console.anthropic.com/settings/keys" target="_blank" class="api-link" title="Get Anthropic API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
                                 </div>
                                 <div class="setting-input">
                                     <input type="password" id="anthropicKey" class="form-control" placeholder="Enter Anthropic API Key">
@@ -159,6 +168,9 @@
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">xAI</div>
+                                    <a href="https://grok.x.ai/api-keys" target="_blank" class="api-link" title="Get xAI API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
                                 </div>
                                 <div class="setting-input">
                                     <input type="password" id="xaiKey" class="form-control" placeholder="Enter xAI API Key">
@@ -169,6 +181,9 @@
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">DeepSeek</div>
+                                    <a href="https://platform.deepseek.com/api-keys" target="_blank" class="api-link" title="Get DeepSeek API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
                                 </div>
                                 <div class="setting-input">
                                     <input type="password" id="deepseekKey" class="form-control" placeholder="Enter DeepSeek API Key">
@@ -248,7 +263,7 @@
             </div>
             
             <div class="modal-footer">
-                <button class="secondary-btn" id="resetSettingsBtn">Reset</button>
+                <button class="secondary-btn close-modal">Close</button>
                 <button id="save-settings" class="primary-btn">Save Settings</button>
             </div>
         </div>

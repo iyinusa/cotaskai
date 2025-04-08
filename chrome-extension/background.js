@@ -221,6 +221,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 .then(() => sendResponse({ success: true }))
                 .catch(error => sendResponse({ error: error.message }));
             return true;
+            
+        case 'notify_iframe_loaded':
+            // Handle notification from content script that iframe has loaded
+            // Send a message to all extension pages (including popups)
+            chrome.runtime.sendMessage({
+                action: 'floating_modal_opened'
+            }).catch(err => {
+                // Suppress errors if no listeners are available
+                console.log('Notified extension pages about floating modal open');
+            });
+            sendResponse({ success: true });
+            return true;
     }
 });
 

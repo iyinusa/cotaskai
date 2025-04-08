@@ -7,9 +7,37 @@ $(document).ready(() => {
     const $tabLinks = $('.tablinks');
     const $settingsModal = $('#settingsModal');
     const $settingsBtn = $('#settingsBtn');
-    const $closeSettingsBtn = $('#closeSettingsBtn');
+    const $closeSettingsBtn = $('.close-modal');
     const $themeToggleBtn = $('#themeToggleBtn');
     const $themeSelect = $('#themeSelect');
+    const $floatingToggleBtn = $('#floatingToggleBtn');
+
+    // Format timestamp to a user-friendly format
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return '';
+        
+        const date = new Date(timestamp);
+        if (isNaN(date)) return '';
+        
+        const today = new Date();
+        const isToday = date.getDate() === today.getDate() &&
+                       date.getMonth() === today.getMonth() &&
+                       date.getFullYear() === today.getFullYear();
+        
+        // Format time as HH:MM
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const time = `${hours}:${minutes}`;
+        
+        // If message is from today, just show time, otherwise show date and time
+        if (isToday) {
+            return time;
+        } else {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            return `${day}/${month} ${time}`;
+        }
+    };
 
     // Auto-resize function
     const autoResize = (elem) => {
@@ -28,7 +56,34 @@ $(document).ready(() => {
         await loadConversations();
         await getCurrentPageContent();
         applySavedSettings();
+        
+        // Make textarea autofocus for better UX
+        setTimeout(() => {
+            $userInput.focus();
+        }, 300);
     };
+    
+    // Listen for event when opened from floating button
+    window.addEventListener('floating-modal-opened', async () => {
+        console.log('Popup opened from floating button - reloading conversations');
+        $chatHistory.empty(); // Clear current conversations
+        await loadConversations(); // Reload conversations for current tab
+    });
+    
+    // Listen for messages from background script (for the floating modal)
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'floating_modal_opened') {
+            console.log('Received floating_modal_opened message from background script');
+            $chatHistory.empty(); // Clear current conversations
+            loadConversations(); // Reload conversations for current tab - async but no need to await
+            
+            // Send response to acknowledge receipt
+            if (sendResponse) {
+                sendResponse({ success: true });
+            }
+        }
+        return true; // Keep message channel open for async response
+    });
 
     // Get page content
     const getCurrentPageContent = async () => {
@@ -113,6 +168,40 @@ $(document).ready(() => {
         });
     };
 
+    // Toggle floating button
+    const toggleFloatingButton = async () => {
+        const floatingBtnState = await Database.getFloatingButtonState();
+        const newState = !floatingBtnState.enabled;
+        
+        // Update the database state
+        await Database.setFloatingButtonState(newState);
+        
+        // Update button appearance to reflect current state
+        updateFloatingButtonIcon(newState);
+        
+        // Update the checkbox in settings modal to match
+        $('#floatingButtonToggle').prop('checked', newState);
+        
+        // Notify all tabs about the change
+        chrome.runtime.sendMessage({
+            action: 'toggle_floating_button',
+            forceState: newState
+        });
+        
+        console.log('Floating button state updated:', newState);
+    };
+    
+    // Update the floating button icon to reflect its current state
+    const updateFloatingButtonIcon = (enabled) => {
+        if (enabled) {
+            $floatingToggleBtn.addClass('active');
+            $floatingToggleBtn.attr('title', 'Disable Floating Button');
+        } else {
+            $floatingToggleBtn.removeClass('active');
+            $floatingToggleBtn.attr('title', 'Enable Floating Button');
+        }
+    };
+
     // Event handlers
     const setupEventListeners = () => {
         // Listen for Enter key press on the input field
@@ -135,6 +224,135 @@ $(document).ready(() => {
         $closeSettingsBtn.on('click', () => {
             $settingsModal.removeClass('active');
         });
+        
+        // Export Chat button click handler
+        $('#exportChatBtn').on('click', async () => {
+            try {
+                // Get the current tab URL
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                
+                // Get conversations for the current tab
+                const conversations = await Database.getConversations(tab.url);
+                
+                if (conversations.length === 0) {
+                    alert('No conversations to export for this tab.');
+                    return;
+                }
+                
+                // Show export options dialog
+                const exportFormat = confirm(
+                    'Choose export format:\n\n' +
+                    'OK = JSON (includes metadata, good for backup)\n' +
+                    'Cancel = Plain text (easier to read)'
+                ) ? 'json' : 'text';
+                
+                let content = '';
+                let filename = '';
+                let dataType = '';
+                
+                // Format according to chosen option
+                if (exportFormat === 'json') {
+                    // JSON format (full data)
+                    content = JSON.stringify({
+                        url: tab.url,
+                        title: tab.title || 'Unknown Page',
+                        exportDate: new Date().toISOString(),
+                        conversations
+                    }, null, 2);
+                    filename = `cotaskai-chat-${new Date().getTime()}.json`;
+                    dataType = 'application/json';
+                } else {
+                    // Plain text format (more readable)
+                    let plainText = `CoTaskAI Chat Export\n`;
+                    plainText += `URL: ${tab.url}\n`;
+                    plainText += `Date: ${new Date().toLocaleString()}\n\n`;
+                    
+                    conversations.forEach(convo => {
+                        if (convo.query) {
+                            plainText += `User: ${convo.query}\n`;
+                            plainText += `Time: ${formatTimestamp(convo.timestamp)}\n\n`;
+                        }
+                        if (convo.response) {
+                            plainText += `AI: ${convo.response}\n`;
+                            plainText += `Time: ${formatTimestamp(convo.timestamp)}\n\n`;
+                        }
+                        plainText += `---\n\n`;
+                    });
+                    
+                    content = plainText;
+                    filename = `cotaskai-chat-${new Date().getTime()}.txt`;
+                    dataType = 'text/plain';
+                }
+                
+                // Create a downloadable blob
+                const blob = new Blob([content], { type: dataType });
+                const url = URL.createObjectURL(blob);
+                
+                // Create a temporary link and trigger the download
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(downloadLink);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                console.log('Chat exported successfully');
+            } catch (error) {
+                console.error('Error exporting chat:', error);
+                alert('An error occurred while exporting the chat history.');
+            }
+        });
+
+        // Clear chat button click handler
+        $('#clearChatBtn').on('click', async () => {
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to clear the chat history for this tab? This action cannot be undone.')) {
+                try {
+                    // Get the current tab URL
+                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                    
+                    // Clear the chat history in the UI
+                    $chatHistory.empty();
+                    
+                    // Get all conversations from the database
+                    const allConversations = await Database.getAllConversations();
+                    
+                    // Filter out conversations from the current tab
+                    const otherTabConversations = allConversations.filter(
+                        conversation => conversation.tabUrl !== tab.url
+                    );
+                    
+                    // Clear all conversations
+                    await Database.clearConversations();
+                    
+                    // Re-add conversations from other tabs
+                    for (const conversation of otherTabConversations) {
+                        await Database.saveConversation(conversation);
+                    }
+                    
+                    // Show welcome message after clearing
+                    // $chatHistory.append(`
+                    //     <div class="welcome-message text-center">
+                    //         <div><img alt="CoTaskAI" src="images/icon.png" /></div>
+                    //         <p>Start a dialogue with the Website or PDF document.</p>
+                    //         <div class="disclaimer text-muted">
+                    //             CoTaskAI helps you analyze text from the current page, and provide responses based on the context. Please note that you might be limited by the number of requests/token you can make to the AI service, depending on your selected model.
+                    //         </div>
+                    //     </div>
+                    // `);
+                    
+                    console.log('Chat history cleared for the current tab');
+                } catch (error) {
+                    console.error('Error clearing chat history:', error);
+                    alert('An error occurred while clearing the chat history.');
+                }
+            }
+        });
 
         // Listen for tab changes
         $tabLinks.on('click', function () {
@@ -151,6 +369,9 @@ $(document).ready(() => {
 
         // Theme toggle button click
         $themeToggleBtn.on('click', toggleTheme);
+        
+        // Floating button toggle click
+        $floatingToggleBtn.on('click', toggleFloatingButton);
 
         // Theme select change
         $themeSelect.on('change', async function() {
@@ -239,7 +460,7 @@ $(document).ready(() => {
             if (resp.error) throw new Error(resp.error);
 
             // Animate AI message
-            displayMessageAnimated(resp.response, 'response');
+            displayMessageAnimated(resp.response, 'response', new Date().toISOString());
 
             // Save conversation to database through background script
             await chrome.runtime.sendMessage({
@@ -280,8 +501,8 @@ $(document).ready(() => {
             } else {
                 // Iterate over the filtered conversations array to display each conversation sequentially
                 conversations.forEach(converse => {
-                    if (converse.query) displayMessage(converse.query, 'prompt');
-                    if (converse.response) displayMessage(converse.response, 'response');
+                    if (converse.query) displayMessage(converse.query, 'prompt', converse.timestamp);
+                    if (converse.response) displayMessage(converse.response, 'response', converse.timestamp);
                 });
             }
         } catch (error) {
@@ -290,65 +511,77 @@ $(document).ready(() => {
     }
 
     // UI function to display message
-    const displayMessage = (text, sender) => {
+    const displayMessage = (text, sender, timestamp = null, id = null) => {
         let formattedText;
-
-        if (sender === 'prompt' || sender === 'response') {
+        
+        // Format the timestamp if provided
+        let timeDisplay = '';
+        if (timestamp) {
+            timeDisplay = `<span class="message-time">${formatTimestamp(timestamp)}</span>`;
+        }
+        
+        if (sender === 'response') {
             formattedText = formatResponseText(text);
         } else {
             formattedText = text.replace(/\n/g, '<br>');
         }
         
+        const messageId = id ? `id="${id}"` : '';
+        
         $chatHistory.append(`
-            <div class="message ${sender}">
-                <div class="message-header">${sender.toUpperCase()}</div>
+            <div class="message ${sender}" ${messageId}>
+                <div class="message-header">
+                    ${sender.toUpperCase()}
+                    ${timeDisplay}
+                </div>
                 <div class="message-content">${formattedText}</div>
             </div>
         `);
         
-        // Add null check before accessing scrollHeight
         if ($chatHistory[0]) {
             $chatHistory.scrollTop($chatHistory[0].scrollHeight);
         }
     };
 
-    // UI function to animate the AI message letter-by-letter
-    const displayMessageAnimated = (text, sender) => {
+    // Animated message display function for better UX
+    const displayMessageAnimated = (text, sender, timestamp = null, id = null) => {
+        let formattedText;
+        
+        // Format the timestamp if provided
+        let timeDisplay = '';
+        if (timestamp) {
+            timeDisplay = `<span class="message-time">${formatTimestamp(timestamp)}</span>`;
+        }
+        
+        if (sender === 'response') {
+            formattedText = formatResponseText(text);
+        } else {
+            formattedText = text.replace(/\n/g, '<br>');
+        }
+        
+        const messageId = id ? `id="${id}"` : '';
+        
+        // Create and append message container
         const $message = $(`
-            <div class="message ${sender}">
-                <div class="message-header">${sender.toUpperCase()}</div>
+            <div class="message ${sender}" ${messageId}>
+                <div class="message-header">
+                    ${sender.toUpperCase()}
+                    ${timeDisplay}
+                </div>
                 <div class="message-content"></div>
             </div>
         `);
+        
         $chatHistory.append($message);
         const $content = $message.find('.message-content');
-        let fullText = (sender === 'response')
-            ? formatResponseText(text)
-            : text.replace(/\n/g, '<br>');
         
-        let index = 0;
-
-        // Animate by progressively appending one character (note: this simple approach treats HTML tags as text)
-        const interval = setInterval(() => {
-            // To avoid breaking HTML tags.
-            // Here we simply append one character at a time.
-            $content.html(fullText.substring(0, index));
-            index++;
-
-            // Scroll chat history to bottom on every update
-            if ($chatHistory[0]) {
-                $chatHistory.scrollTop($chatHistory[0].scrollHeight);
-            }
-
-            if (index > fullText.length) {
-                clearInterval(interval);
-                
-                // Ensure final scroll
-                if ($chatHistory[0]) {
-                    $chatHistory.scrollTop($chatHistory[0].scrollHeight);
-                }
-            }
-        }, 20); 
+        // Animate the text appearing
+        animateTyping(formattedText, $content[0], 0, 1);
+        
+        // Scroll to bottom
+        if ($chatHistory[0]) {
+            $chatHistory.scrollTop($chatHistory[0].scrollHeight);
+        }
     };
 
     // Start thinking animation
@@ -364,6 +597,28 @@ $(document).ready(() => {
         const modelThinking = document.getElementById('modelThinking');
         if (modelThinking) {
             modelThinking.style.display = 'none';
+        }
+    }
+    
+    // Animate typing effect for text responses
+    function animateTyping(text, element, index, speed) {
+        if (index <= text.length) {
+            // Display progressively more of the text
+            element.innerHTML = text.substring(0, index);
+            
+            // Scroll to the bottom as text appears
+            const chatHistory = document.getElementById('chat-history');
+            if (chatHistory) {
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+            
+            // Calculate a slightly random delay for natural typing effect
+            const randomDelay = Math.random() * 10 + speed;
+            
+            // Schedule the next character
+            setTimeout(() => {
+                animateTyping(text, element, index + 1, speed);
+            }, randomDelay);
         }
     }
 
@@ -386,6 +641,9 @@ $(document).ready(() => {
         $('#floatingButtonToggle').prop('checked', floatingBtnState.enabled);
         $('#autoContextToggle').prop('checked', settings.autoLoadContext !== false);
         $('#notificationsToggle').prop('checked', settings.enableNotifications !== false);
+        
+        // Update floating button icon to reflect current state
+        updateFloatingButtonIcon(floatingBtnState.enabled);
 
         // Set the saved API keys in the input fields
         if (apiKeys) {

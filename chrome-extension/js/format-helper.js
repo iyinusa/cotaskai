@@ -108,6 +108,61 @@ function formatResponseText(text) {
 
     // Process blockquotes
     text = text.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
+    
+    // Process markdown tables
+    // This regex finds table blocks with pipe-separated content
+    const tableRegex = /^\|(.+)\|\s*\n\|[-:\s|]+\|\s*\n(\|.+\|\s*\n)+/gm;
+    
+    text = text.replace(tableRegex, function(tableBlock) {
+        // Split the table into rows
+        const rows = tableBlock.trim().split('\n');
+        
+        // Extract header row and alignment row
+        const headerRow = rows[0];
+        const alignmentRow = rows[1];
+        const dataRows = rows.slice(2);
+        
+        // Process header cells
+        const headerCells = headerRow.split('|').slice(1, -1).map(cell => cell.trim());
+        
+        // Determine column alignments from the alignment row
+        // (default left, :--: for center, --: for right)
+        const alignments = alignmentRow.split('|').slice(1, -1).map(cell => {
+            cell = cell.trim();
+            if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
+            if (cell.endsWith(':')) return 'right';
+            return 'left';
+        });
+        
+        // Start building the HTML table
+        let tableHTML = '<div class="table-container"><table class="ai-table">';
+        
+        // Build the header
+        tableHTML += '<thead><tr>';
+        headerCells.forEach((cell, index) => {
+            const alignment = alignments[index] || 'left';
+            tableHTML += `<th style="text-align: ${alignment}">${cell}</th>`;
+        });
+        tableHTML += '</tr></thead>';
+        
+        // Build the body
+        tableHTML += '<tbody>';
+        dataRows.forEach(row => {
+            const cells = row.split('|').slice(1, -1).map(cell => cell.trim());
+            tableHTML += '<tr>';
+            cells.forEach((cell, index) => {
+                const alignment = alignments[index] || 'left';
+                tableHTML += `<td style="text-align: ${alignment}">${cell}</td>`;
+            });
+            tableHTML += '</tr>';
+        });
+        tableHTML += '</tbody>';
+        
+        // Close the table
+        tableHTML += '</table></div>';
+        
+        return tableHTML;
+    });
 
     // Convert newlines to <br> for remaining text
     text = text.replace(/\n/g, '<br>');
