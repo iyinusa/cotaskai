@@ -6,7 +6,7 @@
   <p>LLM power directly in your browser — analyze, summarize, and generate ideas from web content.</p>
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-  [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/yourusername/cotaskai)
+  [![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://github.com/iyinusa/cotaskai)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
   
   <p><img src="images/research.png" alt="CoTaskAI Demo" width="100%"></p>
@@ -17,10 +17,13 @@
 
 - **Content Analysis**: Analyze any webpage or PDF document directly in your browser
 - **Contextual Understanding**: AI understands the content you're viewing for relevant responses
-- **Multiple AI Models**: Choose between OpenAI's models (GPT-3.5, GPT-4, GPT-4o, o1-mini, o3-mini), Gemini, xAI, DeepSeek, Anthropic, etc. coming soon...
+- **Multiple AI Models**: Access models from OpenAI (GPT-3.5, GPT-4, GPT-4o, o1-mini, o3-mini), Google (Gemini 1.5 Pro, 1.5 Flash, 2.0 Flash), with xAI, DeepSeek, Anthropic coming soon
 - **Conversation Persistence**: Conversations are saved per page for future reference
 - **Right-Click Integration**: Select text and ask CoTaskAI via context menu
 - **PDF Support**: Built-in PDF processing capability
+- **Floating Button Interface**: Easy access with a non-intrusive floating button
+- **Syntax Highlighting**: Code snippets are beautifully formatted with syntax highlighting
+- **Markdown Support**: Rich text formatting for AI responses
 
 ## 📋 Table of Contents
 
@@ -42,7 +45,7 @@
 ### Option 2: Manual Installation
 1. Download or clone this repository
    ```bash
-   git clone https://github.com/yourusername/cotaskai.git
+   git clone https://github.com/iyinusa/cotaskai.git
    ```
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" in the top-right corner
@@ -52,7 +55,7 @@
 
 ### Dialogue with Page Content
 1. Navigate to any webpage or PDF document
-2. Click the CoTaskAI icon in your browser toolbar
+2. Click the CoTaskAI icon in your browser toolbar or use the floating button
 3. Type your question in the text field and press Enter
 4. The AI will respond based on the content of the current page
 
@@ -65,6 +68,10 @@
 1. Open any PDF in your browser
 2. Click the CoTaskAI icon to analyze and ask questions about the document
 
+### Floating Button
+1. Access CoTaskAI from any part of the webpage via the floating button
+2. Toggle the button visibility in settings if needed
+
 ## 🔑 API Setup
 
 CoTaskAI requires API keys to function:
@@ -76,17 +83,35 @@ CoTaskAI requires API keys to function:
 4. Go to the "Settings" tab
 5. Paste your OpenAI API key and click "Save Settings"
 
+### Gemini API Key
+1. Create an account at [Google AI Studio](https://aistudio.google.com/)
+2. Generate an API key in your account dashboard
+3. Click on the CoTaskAI extension icon
+4. Go to the "Settings" tab
+5. Paste your Gemini API key and click "Save Settings"
+
 ## ⚙️ Configuration
 
 ### AI Model Selection
 1. Open the extension popup
 2. Use the dropdown menu at the bottom to select your preferred AI model:
-   - GPT-3.5 Turbo (Default)
-   - GPT-4
-   - GPT-4o
-   - o1 Mini
-   - o3 Mini
-   - Other models from Google, xAI, Anthropic, DeepSeek, coming soon....
+   - OpenAI Models:
+     - GPT-3.5 Turbo
+     - GPT-4
+     - GPT-4o
+     - o1 Mini
+     - o3 Mini
+   - Gemini Models:
+     - Gemini 1.5 Pro
+     - Gemini 1.5 Flash
+     - Gemini 2.0 Flash
+   - Other models from xAI, Anthropic, DeepSeek coming soon...
+
+### UI Preferences
+1. Access the settings page from the extension popup
+2. Configure floating button visibility
+3. Adjust theme preferences
+4. Set default conversation behavior
 
 ## 💻 Development
 
@@ -94,23 +119,36 @@ CoTaskAI requires API keys to function:
 ```
 cotaskai/chrome-extension/
 ├── css/
-│   ├── bootstrap.css     # Bootstrap styling framework
-│   └── styles.css        # Custom styles for the extension
+│   ├── animate.min.css       # Animation library
+│   ├── bootstrap.css         # Bootstrap styling framework
+│   ├── code-highlight.css    # Code syntax highlighting styles
+│   ├── floating-button.css   # Floating button styles
+│   ├── font-awesome.css      # Font Awesome icon library
+│   ├── google-fonts.css      # Google Fonts implementation
+│   └── styles.css            # Custom styles for the extension
 ├── images/
-│   ├── icon.png          # Extension icon
-│   └── logo.png          # CoTaskAI logo
+│   ├── icon.png              # Extension icon
+│   ├── logo.png              # CoTaskAI logo
+│   └── research.png          # Demo screenshot
 ├── js/
-│   ├── bootstrap.js      # Bootstrap JavaScript
-│   ├── format-helper.js  # Formatting utilities for responses
-│   ├── jquery.js         # jQuery library
-│   ├── popup.js          # Main extension popup logic
-│   └── pdf/              # PDF processing libraries
-├── background.js         # Background service worker
-├── content-script.js     # Content script for webpage interaction
-├── manifest.json         # Extension manifest file
-├── options.html          # Extension options page
-├── popup.html            # Main extension popup
-└── README.md             # Documentation
+│   ├── bootstrap.js          # Bootstrap JavaScript
+│   ├── database.js           # Database management
+│   ├── dexie.min.js          # IndexedDB wrapper library
+│   ├── floating-button.js    # Floating button functionality
+│   ├── format-helper.js      # Formatting utilities for responses
+│   ├── jquery.js             # jQuery library
+│   ├── marked.min.js         # Markdown parser
+│   ├── popup.js              # Main extension popup logic
+│   ├── prism.min.js          # Code syntax highlighting
+│   └── pdf/                  # PDF processing libraries
+├── webfonts/                 # Font files for icons
+├── background.js             # Background service worker
+├── content-script.js         # Content script for webpage interaction
+├── manifest.json             # Extension manifest file
+├── options.html              # Extension options page
+├── popup.html                # Main extension popup
+├── LICENSE                   # MIT License file
+└── README.md                 # Documentation
 ```
 
 ### Development Setup
@@ -147,7 +185,7 @@ Contributions to CoTaskAI are welcome and appreciated! Here's how you can contri
 
 ### Reporting Issues
 
-1. Check if the issue already exists in the [issues page](https://github.com/yourusername/cotaskai/issues)
+1. Check if the issue already exists in the [issues page](https://github.com/iyinusa/cotaskai/issues)
 2. If not, open a new issue with a descriptive title and detailed description
 3. Include steps to reproduce, expected behavior, and actual behavior
 4. Add relevant screenshots if applicable
@@ -184,4 +222,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [OpenAI](https://openai.com/) for providing the API
+- [Google AI](https://ai.google.dev/) for the Gemini API
+- [Bootstrap](https://getbootstrap.com/) for the responsive UI components
+- [Font Awesome](https://fontawesome.com/) for the icon library
+- [PDF.js](https://mozilla.github.io/pdf.js/) for PDF processing
+- [Dexie.js](https://dexie.org/) for IndexedDB management
+- [Prism.js](https://prismjs.com/) for code syntax highlighting
+- [Marked.js](https://marked.js.org/) for Markdown parsing
 - All contributors who have helped improve this extension
