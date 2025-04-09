@@ -14,6 +14,7 @@
     "host_permissions": [
         "https://api.openai.com/*",
         "https://generativelanguage.googleapis.com/*",
+        "https://zhzsa0sb1.dexie.cloud/*",
         "http://*/*",
         "https://*/*",
         "<all_urls>"

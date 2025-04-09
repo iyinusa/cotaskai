@@ -63,6 +63,40 @@
     padding: 0;
 }
 
+.pt-1 {
+    padding-top: 2px;
+}
+.pt-2 {
+    padding-top: 4px;
+}
+.pt-3 {
+    padding-top: 6px;
+}
+.pt-4 {
+    padding-top: 8px;
+}
+.pt-5 {
+    padding-top: 10px;
+}
+
+.mt-1 {
+    margin-top: 2px;
+}
+
+.mt-2 {
+    margin-top: 4px;
+}
+.mt-3 {
+    margin-top: 6px;
+}
+.mt-4 {
+    margin-top: 8px;
+}
+.mt-5 {
+    margin-top: 10px;
+}
+
+
 body {
     font-family: var(--font-family);
     background-color: var(--bg-color);
@@ -648,7 +682,7 @@ body {
     padding-bottom: 8px;
 }
 
-#themeSelect {
+#themeSelect, #sync-interval {
     padding: 5px 10px !important;
 }
 
@@ -1311,4 +1345,58 @@ select.form-control {
 .secondary-btn:hover {
     background-color: var(--border-color);
     color: var(--text-primary);
+}
+
+/* Cloud Sync */
+.cloud-sync-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.cloud-sync-indicator i {
+    margin-right: 4px;
+}
+
+.cloud-sync-indicator.syncing i {
+    animation: spin 1s linear infinite;
+}
+
+.cloud-sync-indicator.offline {
+    color: #999;
+}
+
+.cloud-sync-indicator.synced {
+    color: #28a745;
+}
+
+.cloud-sync-indicator.error {
+    color: #dc3545;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.sync-status-text {
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+}
+
+.status-badge {
+    margin-left: 10px;
+    font-size: 0.8rem;
 }

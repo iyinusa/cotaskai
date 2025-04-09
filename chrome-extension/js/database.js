@@ -1,204 +1,376 @@
 /**
  * database.js - Dexie database implementation for CoTaskAI
  * Replaces chrome.storage.local with IndexedDB via Dexie.js
+ * Includes Dexie Cloud sync capabilities
  */
 
-// Initialize the database
-const db = new Dexie('CoTaskAIDB');
+// Initialize Dexie and configure cloud sync
+const db = new Dexie('CoTaskAI');
 
-// Define database schema
+// Add Dexie Cloud addon to the database - use self.dexieCloud in service worker context
+try {
+    db.use(typeof dexieCloud !== 'undefined' ? dexieCloud : self.dexieCloud);
+} catch (err) {
+    console.error('Failed to load Dexie Cloud addon:', err);
+}
+
+// Configure the database schema with cloud sync enabled tables
 db.version(1).stores({
-    settings: 'key', // General settings like model, darkMode, etc.
-    apiKeys: 'key',  // API keys for different providers
-    conversations: '++id, tabUrl, timestamp', // Conversation history
-    pageContent: 'url', // Temporary page content for the current session
-    floatingButton: 'key' // Floating button state and position
+    conversations: '++id, tabUrl, timestamp, query, response, [tabUrl+timestamp]', // @sync
+    pageContents: 'tabUrl, content',
+    settings: 'key',
+    apiKeys: 'key',
+    floatingButton: 'key, enabled, position', // @sync
+    syncSettings: 'key'
 });
 
-// Helper functions to work with the database
+// Database access wrapper
 const Database = {
-    /**
-     * Initialize the database and set defaults if needed
-     */
+    // Initialize database
     async initialize() {
-        // Set default settings if they don't exist
-        const settings = await db.settings.get('general');
-        if (!settings) {
+        // Check if we have any settings, otherwise add defaults
+        const settings = await this.getSettings();
+        if (!Object.keys(settings).length) {
+            await this.updateSettings({
+                model: 'gpt-3.5-turbo',
+                temperature: 0.7,
+                maxTokens: 1024
+            });
+        }
+        
+        // Setup automatic sync if needed
+        await this.setupAutoSync();
+    },
+
+    // Conversations methods
+    async saveConversation(data) {
+        try {
+            await db.conversations.add({
+                tabUrl: data.tabUrl,
+                timestamp: data.timestamp,
+                query: data.query,
+                response: data.response
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error saving conversation:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getConversations(tabUrl) {
+        try {
+            return await db.conversations
+                .where('tabUrl')
+                .equals(tabUrl)
+                .sortBy('timestamp');
+        } catch (error) {
+            console.error('Error getting conversations:', error);
+            return [];
+        }
+    },
+
+    async getAllConversations() {
+        try {
+            return await db.conversations.toArray();
+        } catch (error) {
+            console.error('Error getting all conversations:', error);
+            return [];
+        }
+    },
+
+    async clearConversations() {
+        try {
+            await db.conversations.clear();
+            return { success: true };
+        } catch (error) {
+            console.error('Error clearing conversations:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Page content methods
+    async savePageContent(tabUrl, content) {
+        try {
+            await db.pageContents.put({
+                tabUrl,
+                content
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error saving page content:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getPageContent(tabUrl) {
+        try {
+            const pageContent = await db.pageContents.get(tabUrl);
+            return pageContent ? pageContent.content : '';
+        } catch (error) {
+            console.error('Error getting page content:', error);
+            return '';
+        }
+    },
+
+    // Settings methods
+    async updateSettings(settings) {
+        try {
             await db.settings.put({
                 key: 'general',
-                model: 'gpt-3.5-turbo',
-                darkMode: false
+                ...settings
             });
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating settings:', error);
+            return { success: false, error: error.message };
         }
+    },
 
-        // Set default floating button settings if they don't exist
-        const floatingBtn = await db.floatingButton.get('state');
-        if (!floatingBtn) {
+    async getSettings() {
+        try {
+            const settings = await db.settings.get('general');
+            return settings || {};
+        } catch (error) {
+            console.error('Error getting settings:', error);
+            return {};
+        }
+    },
+
+    // API key methods
+    async saveApiKeys(apiKeys) {
+        try {
+            await db.apiKeys.put({
+                key: 'apiKeys',
+                ...apiKeys
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error saving API keys:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getApiKeys() {
+        try {
+            const apiKeys = await db.apiKeys.get('apiKeys');
+            return apiKeys || {};
+        } catch (error) {
+            console.error('Error getting API keys:', error);
+            return {};
+        }
+    },
+
+    // Floating button methods
+    async setFloatingButtonState(enabled) {
+        try {
             await db.floatingButton.put({
                 key: 'state',
-                enabled: true
+                enabled
             });
+            return { success: true };
+        } catch (error) {
+            console.error('Error setting floating button state:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    /**
-     * Get settings from the database
-     * @returns {Promise<Object>} The settings object
-     */
-    async getSettings() {
-        const settings = await db.settings.get('general');
-        return settings || { model: 'gpt-3.5-turbo', darkMode: false };
-    },
-
-    /**
-     * Update settings in the database
-     * @param {Object} newSettings - The new settings to save
-     */
-    async updateSettings(newSettings) {
-        const settings = await this.getSettings();
-        await db.settings.put({
-            key: 'general',
-            ...settings,
-            ...newSettings
-        });
-    },
-
-    /**
-     * Get all API keys
-     * @returns {Promise<Object>} Object containing all API keys
-     */
-    async getApiKeys() {
-        const keys = await db.apiKeys.get('providers');
-        return keys || { 
-            openai: '', 
-            gemini: '', 
-            anthropic: '', 
-            xai: '', 
-            deepseek: '' 
-        };
-    },
-
-    /**
-     * Save API keys to the database
-     * @param {Object} keys - Object containing API keys
-     */
-    async saveApiKeys(keys) {
-        await db.apiKeys.put({
-            key: 'providers',
-            ...keys
-        });
-    },
-
-    /**
-     * Get the API key for backward compatibility
-     * @returns {Promise<string>} The OpenAI API key
-     */
-    async getLegacyApiKey() {
-        const keys = await this.getApiKeys();
-        return keys.openai || '';
-    },
-
-    /**
-     * Save page content for the current session
-     * @param {string} url - The URL of the page
-     * @param {string} content - The page content
-     */
-    async savePageContent(url, content) {
-        await db.pageContent.put({
-            url,
-            content
-        });
-    },
-
-    /**
-     * Get page content for a URL
-     * @param {string} url - The URL to get content for
-     * @returns {Promise<string>} The page content
-     */
-    async getPageContent(url) {
-        const data = await db.pageContent.get(url);
-        return data ? data.content : '';
-    },
-
-    /**
-     * Get all conversations for a specific URL
-     * @param {string} url - The URL to filter conversations by
-     * @returns {Promise<Array>} Array of conversation objects
-     */
-    async getConversations(url) {
-        return await db.conversations.where('tabUrl').equals(url).toArray();
-    },
-
-    /**
-     * Get all conversations
-     * @returns {Promise<Array>} Array of all conversation objects
-     */
-    async getAllConversations() {
-        return await db.conversations.toArray();
-    },
-
-    /**
-     * Save a new conversation to the database
-     * @param {Object} conversation - The conversation to save
-     */
-    async saveConversation(conversation) {
-        await db.conversations.add({
-            ...conversation,
-            timestamp: conversation.timestamp || new Date().toISOString()
-        });
-    },
-
-    /**
-     * Clear all conversations
-     */
-    async clearConversations() {
-        await db.conversations.clear();
-    },
-
-    /**
-     * Get floating button state
-     * @returns {Promise<Object>} Floating button state object
-     */
     async getFloatingButtonState() {
-        const state = await db.floatingButton.get('state');
-        return state || { enabled: true };
+        try {
+            const state = await db.floatingButton.get('state');
+            return state || { enabled: false };
+        } catch (error) {
+            console.error('Error getting floating button state:', error);
+            return { enabled: false };
+        }
     },
-
-    /**
-     * Set floating button state
-     * @param {boolean} enabled - Whether the floating button is enabled
-     */
-    async setFloatingButtonState(enabled) {
-        const state = await this.getFloatingButtonState();
-        await db.floatingButton.put({
-            key: 'state',
-            ...state,
-            enabled
-        });
-    },
-
-    /**
-     * Get floating button position
-     * @returns {Promise<Object>} Floating button position object
-     */
-    async getFloatingButtonPosition() {
-        const position = await db.floatingButton.get('position');
-        return position || { top: '20px', left: '20px' };
-    },
-
-    /**
-     * Save floating button position
-     * @param {Object} position - The position object with top and left
-     */
+    
     async saveFloatingButtonPosition(position) {
-        await db.floatingButton.put({
-            key: 'position',
-            ...position
-        });
+        try {
+            await db.floatingButton.put({
+                key: 'position',
+                position
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error saving floating button position:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getFloatingButtonPosition() {
+        try {
+            const positionEntry = await db.floatingButton.get('position');
+            return positionEntry ? positionEntry.position : {
+                left: '20px',
+                top: '20px'
+            };
+        } catch (error) {
+            console.error('Error getting floating button position:', error);
+            return {
+                left: '20px',
+                top: '20px'
+            };
+        }
+    },
+
+    // Sync settings methods
+    async updateSyncSettings(settings) {
+        try {
+            const current = await db.syncSettings.get('syncSettings') || {};
+            await db.syncSettings.put({
+                key: 'syncSettings',
+                ...current,
+                ...settings
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating sync settings:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getSyncSettings() {
+        try {
+            const settings = await db.syncSettings.get('syncSettings');
+            return settings || { 
+                enabled: false,
+                autoSync: false,
+                syncInterval: 5,
+                lastSynced: null
+            };
+        } catch (error) {
+            console.error('Error getting sync settings:', error);
+            return {
+                enabled: false,
+                autoSync: false,
+                syncInterval: 5,
+                lastSynced: null
+            };
+        }
+    },
+
+    // Cloud sync authentication methods
+    async authenticate(email) {
+        try {
+            // Connect to Dexie Cloud and send an email with a login link
+            await db.cloud.login({ email });
+            return {
+                success: true,
+                message: 'Authentication email sent to ' + email
+            };
+        } catch (error) {
+            console.error('Error authenticating with Dexie Cloud:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    },
+
+    async isAuthenticated() {
+        try {
+            // Check if user is authenticated
+            const userId = await db.cloud.currentUserId();
+            return !!userId;
+        } catch (error) {
+            console.error('Error checking authentication status:', error);
+            return false;
+        }
+    },
+
+    async signOut() {
+        try {
+            // Sign out from Dexie Cloud
+            await db.cloud.logout();
+            return { 
+                success: true 
+            };
+        } catch (error) {
+            console.error('Error signing out from Dexie Cloud:', error);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        }
+    },
+
+    // Sync data with Dexie Cloud
+    async syncData() {
+        try {
+            // Sync data with Dexie Cloud
+            const result = await db.cloud.sync();
+            
+            // Update last synced time
+            await this.updateSyncSettings({
+                lastSynced: new Date().toISOString()
+            });
+            
+            return {
+                success: true,
+                pullCount: result.pullCount,
+                pushCount: result.pushCount
+            };
+        } catch (error) {
+            console.error('Error syncing with Dexie Cloud:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    },
+
+    // Setup automatic sync process
+    async setupAutoSync() {
+        // Service worker context doesn't have window, use self instead
+        // Clear any existing intervals
+        if (self.syncInterval) {
+            clearInterval(self.syncInterval);
+            self.syncInterval = null;
+        }
+        
+        // Check if auto sync is enabled
+        const syncSettings = await this.getSyncSettings();
+        if (!syncSettings.enabled || !syncSettings.autoSync) return;
+        
+        // Check if user is authenticated
+        const isAuth = await this.isAuthenticated();
+        if (!isAuth) return;
+        
+        // Set up interval for automatic sync
+        const intervalMinutes = syncSettings.syncInterval || 5;
+        self.syncInterval = setInterval(async () => {
+            // Only sync if the user is still authenticated
+            if (await this.isAuthenticated()) {
+                await this.syncData();
+            } else {
+                // If user is no longer authenticated, clear interval
+                clearInterval(self.syncInterval);
+                self.syncInterval = null;
+            }
+        }, intervalMinutes * 60 * 1000);
     }
 };
 
-// Initialize the database when the script loads
-Database.initialize().catch(err => {
-    console.error('Failed to initialize database:', err);
+// Listen for changes to sync settings using hooks
+db.syncSettings.hook('updating', (modifications, primKey, obj) => {
+    // If sync settings are modified, update the auto sync
+    setTimeout(async () => {
+        await Database.setupAutoSync();
+    }, 0);
+});
+
+// Initialize Dexie Cloud with configuration
+db.cloud.configure({
+    dxcloudUrl: "https://zhzsa0sb1.dexie.cloud", // Your Dexie Cloud URL
+    requireAuth: false, // Allow unauthenticated access but sync when authenticated
+    schema: {
+        // Define which tables should be synced (@sync is added in the schema above)
+        conversations: {
+            sync: true
+        },
+        floatingButton: {
+            sync: true
+        }
+    }
 });

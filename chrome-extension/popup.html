@@ -61,6 +61,12 @@
         <!-- Footer -->
         <footer class="app-footer">
             <div class="action-buttons">
+                <!-- Cloud Sync Status -->
+                <div class="cloud-sync-indicator" id="cloudSyncIndicator" title="Cloud Sync Status">
+                    <i class="fas fa-cloud"></i>
+                    <span id="syncStatus">Not synced</span>
+                </div>
+                
                 <div class="model-selector-wrapper">
                     <div class="model-selector">
                         <select id="modelSelect">
@@ -117,6 +123,10 @@
                     <button class="nav-item tablinks" data-tab="preferences">
                         <i class="fas fa-sliders-h"></i>
                         <span>Preferences</span>
+                    </button>
+                    <button class="nav-item tablinks" data-tab="sync">
+                        <i class="fas fa-cloud"></i>
+                        <span>Sync</span>
                     </button>
                 </div>
                 
@@ -259,6 +269,93 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Cloud Sync Tab -->
+                    <div id="sync" class="tab-pane">
+                        <div class="setting-section">
+                            <div class="setting-item toggle-switch">
+                                <div class="setting-header">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <div class="setting-title">Enable Cloud Sync</div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="enableSyncToggle" class="toggle-input">
+                                    <label for="enableSyncToggle" class="toggle-label"></label>
+                                </div>
+                            </div>
+                            <p class="text-muted small mt-2">
+                                Sync your conversations and settings across devices.
+                                <br><br><b>Note:</b> API keys are not synced for security reasons.
+                            </p>
+                            
+                            <!-- Authentication Section -->
+                            <div id="auth-section" class="setting-subsection mt-3" style="display: none;">
+                                <h6 class="setting-subtitle">Authentication</h6>
+                                <div id="not-authenticated-section">
+                                    <div class="d-flex mb-3">
+                                        <input type="email" class="form-control" id="auth-email" placeholder="Enter your email">
+                                        <button class="btn btn-primary ml-2" id="auth-button">
+                                            <span id="auth-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                            Login
+                                        </button>
+                                    </div>
+                                    <p class="text-muted small">
+                                        You'll receive a login link via email.
+                                    </p>
+                                </div>
+                                <div id="authenticated-section" style="display: none;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span>
+                                            <i class="fas fa-user me-2"></i>
+                                            <span id="user-email"></span>
+                                        </span>
+                                        <span class="badge bg-success ms-3">Authenticated</span>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger" id="sign-out-button">Sign Out</button>
+                                </div>
+                            </div>
+
+                            <!-- Auto Sync Settings -->
+                            <div id="sync-options" class="setting-subsection mt-3" style="display: none;">
+                                <h6 class="setting-subtitle">Sync Options</h6>
+                                <div class="setting-item toggle-switch">
+                                    <div class="setting-header">
+                                        <i class="fas fa-sync-alt"></i>
+                                        <div class="setting-title">Automatically Sync</div>
+                                    </div>
+                                    <div class="toggle-container">
+                                        <input type="checkbox" id="autoSyncToggle" class="toggle-input">
+                                        <label for="autoSyncToggle" class="toggle-label"></label>
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-header mt-3">
+                                        <i class="fas fa-clock"></i>
+                                        <div class="setting-title">Sync Interval</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="form-control" id="sync-interval">
+                                            <option value="1">1 minute</option>
+                                            <option value="5">5 minutes</option>
+                                            <option value="15">15 minutes</option>
+                                            <option value="30">30 minutes</option>
+                                            <option value="60">1 hour</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary mt-3" id="sync-now-button">
+                                    <span id="sync-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                    Sync Now
+                                </button>
+                                <div class="sync-status-text mt-3">
+                                    <div id="last-synced-container" style="display: none;">
+                                        Last synced: <span id="last-synced-time">Never</span>
+                                    </div>
+                                    <div id="sync-result" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -275,6 +372,7 @@
     <script src="js/prism.min.js"></script>
     <script src="js/format-helper.js"></script>
     <script src="js/dexie.min.js"></script>
+    <script src="js/dexie-cloud.min.js"></script>
     <script src="js/database.js"></script>
     <script src="js/popup.js"></script>
     <script src="js/pdf/pdf.min.js"></script>

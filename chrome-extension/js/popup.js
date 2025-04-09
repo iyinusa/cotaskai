@@ -11,6 +11,11 @@ $(document).ready(() => {
     const $themeToggleBtn = $('#themeToggleBtn');
     const $themeSelect = $('#themeSelect');
     const $floatingToggleBtn = $('#floatingToggleBtn');
+    const $cloudSyncIndicator = $('#cloudSyncIndicator');
+    const $syncStatus = $('#syncStatus');
+    
+    // Add flag to prevent duplicate conversation loading
+    let isLoadingConversations = false;
 
     // Format timestamp to a user-friendly format
     const formatTimestamp = (timestamp) => {
@@ -56,6 +61,7 @@ $(document).ready(() => {
         await loadConversations();
         await getCurrentPageContent();
         applySavedSettings();
+        updateSyncStatus();
         
         // Make textarea autofocus for better UX
         setTimeout(() => {
@@ -63,19 +69,136 @@ $(document).ready(() => {
         }, 300);
     };
     
+    // Update cloud sync status indicator
+    const updateSyncStatus = async () => {
+        try {
+            // Get sync settings from the database
+            const syncSettings = await Database.getSyncSettings();
+            
+            // Check if sync is enabled and authenticated
+            if (!syncSettings.enabled) {
+                $cloudSyncIndicator.removeClass('syncing synced error').addClass('offline');
+                $syncStatus.text('Sync off');
+                return;
+            }
+            
+            // Check authentication status
+            const isAuth = await Database.isAuthenticated();
+            if (!isAuth) {
+                $cloudSyncIndicator.removeClass('syncing synced offline').addClass('error');
+                $syncStatus.text('Not logged in');
+                return;
+            }
+            
+            // If authenticated and enabled, show the last sync time or trigger a sync
+            if (syncSettings.lastSynced) {
+                $cloudSyncIndicator.removeClass('syncing error offline').addClass('synced');
+                
+                // Calculate time since last sync
+                const lastSync = new Date(syncSettings.lastSynced);
+                const now = new Date();
+                const diffMinutes = Math.floor((now - lastSync) / (1000 * 60));
+                
+                if (diffMinutes < 1) {
+                    $syncStatus.text('Just synced');
+                } else if (diffMinutes < 60) {
+                    $syncStatus.text(`Synced ${diffMinutes}m ago`);
+                } else {
+                    const diffHours = Math.floor(diffMinutes / 60);
+                    $syncStatus.text(`Synced ${diffHours}h ago`);
+                }
+            } else {
+                $cloudSyncIndicator.removeClass('syncing error offline').addClass('synced');
+                $syncStatus.text('Synced');
+            }
+        } catch (error) {
+            console.error('Error updating sync status:', error);
+            $cloudSyncIndicator.removeClass('syncing synced offline').addClass('error');
+            $syncStatus.text('Sync error');
+        }
+    };
+    
+    // Trigger manual sync when the indicator is clicked
+    const triggerManualSync = async () => {
+        try {
+            // Check if sync is enabled
+            const syncSettings = await Database.getSyncSettings();
+            if (!syncSettings.enabled) {
+                // If sync is disabled, open settings modal to sync tab when clicked
+                $settingsModal.addClass('active');
+                // Switch to sync tab
+                $tabLinks.removeClass('active');
+                $tabPanes.removeClass('active');
+                $('[data-tab="sync"]').addClass('active');
+                $('#sync').addClass('active');
+                return;
+            }
+            
+            // Check authentication
+            const isAuth = await Database.isAuthenticated();
+            if (!isAuth) {
+                // If not authenticated, open settings modal to sync tab
+                $settingsModal.addClass('active');
+                // Switch to sync tab
+                $tabLinks.removeClass('active');
+                $tabPanes.removeClass('active');
+                $('[data-tab="sync"]').addClass('active');
+                $('#sync').addClass('active');
+                return;
+            }
+            
+            // Show syncing state
+            $cloudSyncIndicator.removeClass('synced error offline').addClass('syncing');
+            $syncStatus.text('Syncing...');
+            
+            // Trigger sync
+            const result = await Database.syncData();
+            
+            // Update UI based on result
+            if (result.success) {
+                $cloudSyncIndicator.removeClass('syncing error offline').addClass('synced');
+                $syncStatus.text('Just synced');
+                
+                // Reload conversations to reflect any changes from the cloud
+                $chatHistory.empty();
+                await loadConversations();
+            } else {
+                $cloudSyncIndicator.removeClass('syncing synced offline').addClass('error');
+                $syncStatus.text('Sync failed');
+            }
+        } catch (error) {
+            console.error('Error during manual sync:', error);
+            $cloudSyncIndicator.removeClass('syncing synced offline').addClass('error');
+            $syncStatus.text('Sync error');
+        }
+    };
+    
     // Listen for event when opened from floating button
     window.addEventListener('floating-modal-opened', async () => {
         console.log('Popup opened from floating button - reloading conversations');
+        
+        // Check if conversations are already being loaded
+        if (isLoadingConversations) return;
+        
+        isLoadingConversations = true;
         $chatHistory.empty(); // Clear current conversations
         await loadConversations(); // Reload conversations for current tab
+        isLoadingConversations = false;
     });
     
     // Listen for messages from background script (for the floating modal)
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'floating_modal_opened') {
             console.log('Received floating_modal_opened message from background script');
-            $chatHistory.empty(); // Clear current conversations
-            loadConversations(); // Reload conversations for current tab - async but no need to await
+            
+            // Only load conversations if they're not already being loaded
+            if (!isLoadingConversations) {
+                isLoadingConversations = true;
+                $chatHistory.empty(); // Clear current conversations
+                loadConversations().then(() => {
+                    isLoadingConversations = false;
+                }); // Reload conversations for current tab
+            }
             
             // Send response to acknowledge receipt
             if (sendResponse) {
@@ -204,6 +327,9 @@ $(document).ready(() => {
 
     // Event handlers
     const setupEventListeners = () => {
+        // Cloud sync indicator click handler
+        $cloudSyncIndicator.on('click', triggerManualSync);
+        
         // Listen for Enter key press on the input field
         $userInput.on('keydown', e => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -335,18 +461,23 @@ $(document).ready(() => {
                         await Database.saveConversation(conversation);
                     }
                     
-                    // Show welcome message after clearing
-                    // $chatHistory.append(`
-                    //     <div class="welcome-message text-center">
-                    //         <div><img alt="CoTaskAI" src="images/icon.png" /></div>
-                    //         <p>Start a dialogue with the Website or PDF document.</p>
-                    //         <div class="disclaimer text-muted">
-                    //             CoTaskAI helps you analyze text from the current page, and provide responses based on the context. Please note that you might be limited by the number of requests/token you can make to the AI service, depending on your selected model.
-                    //         </div>
-                    //     </div>
-                    // `);
-                    
                     console.log('Chat history cleared for the current tab');
+                    
+                    // After clearing conversations, trigger a sync if enabled
+                    try {
+                        const syncSettings = await Database.getSyncSettings();
+                        if (syncSettings.enabled && await Database.isAuthenticated()) {
+                            // Show syncing state
+                            $cloudSyncIndicator.removeClass('synced error offline').addClass('syncing');
+                            $syncStatus.text('Syncing...');
+                            
+                            // Trigger sync
+                            await Database.syncData();
+                            updateSyncStatus();
+                        }
+                    } catch (error) {
+                        console.error('Error syncing after clear:', error);
+                    }
                 } catch (error) {
                     console.error('Error clearing chat history:', error);
                     alert('An error occurred while clearing the chat history.');
@@ -380,43 +511,88 @@ $(document).ready(() => {
             applyTheme(selectedTheme);
         });
 
+        // Enable sync toggle
+        $('#enableSyncToggle').on('change', function() {
+            const enabled = $(this).prop('checked');
+            toggleSyncSections(enabled);
+        });
+        
+        // Authentication button
+        $('#auth-button').on('click', authenticate);
+        
+        // Sign out button
+        $('#sign-out-button').on('click', signOut);
+        
+        // Sync now button
+        $('#sync-now-button').on('click', syncNow);
+
         // Save settings handler
         $('#save-settings').on('click', async () => {
-            // Collect all API keys
-            const apiKeys = {
-                openai: $('#openAIKey').val().trim(),
-                gemini: $('#geminiKey').val().trim(),
-                anthropic: $('#anthropicKey').val().trim(),
-                xai: $('#xaiKey').val().trim(),
-                deepseek: $('#deepseekKey').val().trim()
-            };
+            // Show a saving indicator or spinner
+            const $saveBtn = $('#save-settings');
+            const originalText = $saveBtn.text();
+            $saveBtn.prop('disabled', true);
+            $saveBtn.text('Saving...');
             
-            // Collect appearance settings
-            const theme = $('#themeSelect').val();
-            const enableAnimations = $('#animationsToggle').prop('checked');
-            
-            // Collect preference settings
-            const enableFloatingButton = $('#floatingButtonToggle').prop('checked');
-            const autoLoadContext = $('#autoContextToggle').prop('checked');
-            const enableNotifications = $('#notificationsToggle').prop('checked');
-            
-            // Save settings to database
-            await Database.saveApiKeys(apiKeys);
-            await Database.updateSettings({
-                theme,
-                enableAnimations,
-                enableFloatingButton,
-                autoLoadContext,
-                enableNotifications
-            });
-            
-            // Update floating button state if necessary
-            await Database.setFloatingButtonState(enableFloatingButton);
-            
-            console.log('Settings saved successfully!');
-            
-            // Close the settings modal after saving
-            $settingsModal.removeClass('active');
+            try {
+                // Collect API keys
+                const apiKeys = {
+                    openai: $('#openAIKey').val().trim(),
+                    gemini: $('#geminiKey').val().trim(),
+                    anthropic: $('#anthropicKey').val().trim(),
+                    xai: $('#xaiKey').val().trim(),
+                    deepseek: $('#deepseekKey').val().trim()
+                };
+                
+                // Collect appearance settings
+                const theme = $('#themeSelect').val();
+                const enableAnimations = $('#animationsToggle').prop('checked');
+                
+                // Collect preference settings
+                const enableFloatingButton = $('#floatingButtonToggle').prop('checked');
+                const autoLoadContext = $('#autoContextToggle').prop('checked');
+                const enableNotifications = $('#notificationsToggle').prop('checked');
+                
+                // Collect sync settings
+                const enableSync = $('#enableSyncToggle').prop('checked');
+                const autoSync = $('#autoSyncToggle').prop('checked');
+                const syncInterval = parseInt($('#sync-interval').val(), 10);
+                
+                // Save all settings to database
+                await Database.saveApiKeys(apiKeys);
+                await Database.updateSettings({
+                    theme,
+                    enableAnimations,
+                    enableFloatingButton,
+                    autoLoadContext,
+                    enableNotifications
+                });
+                
+                // Update floating button state if necessary
+                await Database.setFloatingButtonState(enableFloatingButton);
+                
+                // Save sync settings
+                await Database.updateSyncSettings({
+                    enabled: enableSync,
+                    autoSync: autoSync,
+                    syncInterval: syncInterval
+                });
+                
+                // Update sync status indicator
+                updateSyncStatus();
+                
+                console.log('Settings saved successfully!');
+                
+                // Close the settings modal after saving
+                $settingsModal.removeClass('active');
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('Error saving settings: ' + error.message);
+            } finally {
+                // Restore button state
+                $saveBtn.prop('disabled', false);
+                $saveBtn.text(originalText);
+            }
         });
 
         // Listen for changes on the model selection dropdown
@@ -431,6 +607,204 @@ $(document).ready(() => {
         // Setup system theme change listener
         setupThemeChangeListener();
     };
+
+    /**
+     * Toggle the visibility of sync-related sections
+     * @param {boolean} enabled - Whether sync is enabled
+     */
+    function toggleSyncSections(enabled) {
+        if (enabled) {
+            $('#auth-section').show();
+            $('#sync-options').show();
+        } else {
+            $('#auth-section').hide();
+            $('#sync-options').hide();
+        }
+    }
+    
+    /**
+     * Authenticate with Dexie Cloud
+     */
+    async function authenticate() {
+        const email = $('#auth-email').val().trim();
+        if (!email || !isValidEmail(email)) {
+            alert('Please enter a valid email address');
+            return;
+        }
+        
+        try {
+            // Show spinner
+            toggleAuthSpinner(true);
+            
+            // Attempt to authenticate
+            const result = await Database.authenticate(email);
+            
+            if (result.success) {
+                alert(result.message || 'Authentication email sent. Please check your inbox.');
+                
+                // Check auth status periodically for 2 minutes
+                let checkCount = 0;
+                const authCheckInterval = setInterval(async () => {
+                    const isAuth = await Database.isAuthenticated();
+                    if (isAuth) {
+                        clearInterval(authCheckInterval);
+                        await checkAuthStatus();
+                        alert('Successfully authenticated!');
+                        // Update sync status
+                        updateSyncStatus();
+                    } else if (++checkCount >= 24) { // 24 * 5 seconds = 2 minutes
+                        clearInterval(authCheckInterval);
+                    }
+                }, 5000);
+            } else {
+                alert('Authentication failed: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Authentication error:', error);
+            alert('Authentication error: ' + error.message);
+        } finally {
+            // Hide spinner
+            toggleAuthSpinner(false);
+        }
+    }
+    
+    /**
+     * Sign out from Dexie Cloud
+     */
+    async function signOut() {
+        try {
+            const result = await Database.signOut();
+            
+            if (result.success) {
+                alert('Successfully signed out.');
+                await checkAuthStatus();
+                // Update sync status
+                updateSyncStatus();
+            } else {
+                alert('Sign out failed: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Sign out error:', error);
+            alert('Sign out error: ' + error.message);
+        }
+    }
+    
+    /**
+     * Check authentication status and update UI
+     */
+    async function checkAuthStatus() {
+        try {
+            const isAuthenticated = await Database.isAuthenticated();
+            
+            // Show the appropriate section based on authentication status
+            $('#not-authenticated-section').toggle(!isAuthenticated);
+            $('#authenticated-section').toggle(isAuthenticated);
+            
+            if (isAuthenticated) {
+                // Get user email and display it
+                const userId = await db.cloud.currentUserId();
+                if (userId) {
+                    // In a real implementation, you might want to store and retrieve the email
+                    // For now, we'll just use the user ID as a placeholder
+                    $('#user-email').text(userId);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking authentication status:', error);
+        }
+    }
+    
+    /**
+     * Trigger manual sync with Dexie Cloud
+     */
+    async function syncNow() {
+        try {
+            // Show spinner
+            toggleSyncSpinner(true);
+            
+            // Clear any previous sync results
+            $('#sync-result').empty();
+            
+            // Trigger sync
+            const result = await Database.syncData();
+            
+            if (result.success) {
+                // Update last synced time
+                $('#last-synced-container').show();
+                $('#last-synced-time').text(formatDate(new Date()));
+                
+                // Show sync results
+                $('#sync-result').html(
+                    `<div class="alert alert-success">
+                        Sync completed successfully!<br>
+                        Pulled ${result.pullCount} items. Pushed ${result.pushCount} items.
+                    </div>`
+                );
+                
+                // Update sync status indicator
+                updateSyncStatus();
+            } else {
+                $('#sync-result').html(
+                    `<div class="alert alert-danger">
+                        Sync failed: ${result.error || 'Unknown error'}
+                    </div>`
+                );
+            }
+        } catch (error) {
+            console.error('Sync error:', error);
+            $('#sync-result').html(
+                `<div class="alert alert-danger">
+                    Sync error: ${error.message}
+                </div>`
+            );
+        } finally {
+            // Hide spinner
+            toggleSyncSpinner(false);
+        }
+    }
+    
+    /**
+     * Toggle the authentication spinner
+     * @param {boolean} show - Whether to show or hide the spinner
+     */
+    function toggleAuthSpinner(show) {
+        $('#auth-spinner').toggleClass('d-none', !show);
+        $('#auth-button').prop('disabled', show);
+    }
+    
+    /**
+     * Toggle the sync spinner
+     * @param {boolean} show - Whether to show or hide the spinner
+     */
+    function toggleSyncSpinner(show) {
+        $('#sync-spinner').toggleClass('d-none', !show);
+        $('#sync-now-button').prop('disabled', show);
+    }
+    
+    /**
+     * Format date for display
+     * @param {Date} date - The date to format
+     * @returns {string} The formatted date string
+     */
+    function formatDate(date) {
+        return date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
+    
+    /**
+     * Validate email format
+     * @param {string} email - The email to validate
+     * @returns {boolean} Whether the email is valid
+     */
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
 
     // Handle messages
     const handleUserMessage = async () => {
@@ -472,6 +846,16 @@ $(document).ready(() => {
                     tabUrl: tab.url,
                 }
             });
+
+            // After saving conversation, trigger a sync if enabled
+            const syncSettings = await Database.getSyncSettings();
+            if (syncSettings.enabled && await Database.isAuthenticated()) {
+                // Don't show syncing UI to avoid disruption during conversation
+                const result = await Database.syncData();
+                
+                // Update the status indicator after sync
+                updateSyncStatus();
+            }
         } catch (error) {
             displayMessage(`Error: ${error.message}`, 'error');
         } finally {
@@ -627,6 +1011,7 @@ $(document).ready(() => {
         // Get settings and API keys from database
         const settings = await Database.getSettings();
         const apiKeys = await Database.getApiKeys();
+        const syncSettings = await Database.getSyncSettings();
         
         // Apply theme setting
         const theme = settings.theme || 'system';
@@ -657,8 +1042,31 @@ $(document).ready(() => {
         // Set the saved model in the dropdown
         const model = settings.model || 'gpt-3.5-turbo';
         $('#modelSelect').val(model);
+        
+        // Set sync settings
+        $('#enableSyncToggle').prop('checked', syncSettings.enabled || false);
+        $('#autoSyncToggle').prop('checked', syncSettings.autoSync || false);
+        $('#sync-interval').val(syncSettings.syncInterval || '5');
+        
+        // Show/hide sync sections based on enabled state
+        toggleSyncSections(syncSettings.enabled || false);
+        
+        // Update last synced time if available
+        if (syncSettings.lastSynced) {
+            $('#last-synced-container').show();
+            $('#last-synced-time').text(formatDate(new Date(syncSettings.lastSynced)));
+        }
+        
+        // Check authentication status and update UI
+        await checkAuthStatus();
+        
+        // Check and display cloud sync status
+        updateSyncStatus();
     }
 
     // Initialize
     initPopup().then(setupEventListeners);
+    
+    // Set up periodic sync check (every 5 minutes)
+    setInterval(updateSyncStatus, 5 * 60 * 1000);
 });

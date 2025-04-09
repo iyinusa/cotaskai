@@ -1,6 +1,35 @@
 // background.js - Service Worker (Manifest V3)
-// Import database.js module
-importScripts('js/dexie.min.js', 'js/database.js');
+// Import scripts with proper error handling and fallbacks
+try {
+  // First load dexie.min.js which is required
+  importScripts('js/dexie.min.js');
+  
+  // Create a fallback for dexie-cloud in case it fails to load
+  self.dexieCloud = {
+    configure: () => console.warn("Dexie Cloud placeholder - sync features may be limited")
+  };
+  
+  // Try to load dexie-cloud, but don't let it break everything if it fails
+  try {
+    importScripts('js/dexie-cloud.min.js');
+    console.log("Dexie Cloud loaded successfully");
+  } catch (cloudError) {
+    console.warn("Dexie Cloud import failed:", cloudError.message);
+    // Fallback already defined above, so we can continue
+  }
+  
+  // Now import database.js which depends on the above
+  importScripts('js/database.js');
+} catch (error) {
+  console.error("Critical error importing scripts:", error);
+  // Report the error so it's easier to debug
+  chrome.runtime.sendMessage({
+    action: 'service_worker_error',
+    error: error.message || 'Unknown error loading service worker scripts'
+  }).catch(() => {
+    // Suppress errors if no listeners
+  });
+}
 
 // Initialize context menu
 chrome.runtime.onInstalled.addListener(() => {
@@ -12,9 +41,13 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 
     // Initialize database with default values
-    Database.initialize().catch(err => {
-        console.error('Failed to initialize database:', err);
-    });
+    if (typeof Database !== 'undefined') {
+        Database.initialize().catch(err => {
+            console.error('Failed to initialize database:', err);
+        });
+    } else {
+        console.error('Database not initialized properly');
+    }
 });
 
 // Context menu click handler
