@@ -59,11 +59,6 @@
 3. Type your question in the text field and press Enter
 4. The AI will respond based on the content of the current page
 
-### Context Menu
-1. Select text on any webpage
-2. Right-click and select "Ask CoTaskAI"
-3. View the AI's analysis of the selected text
-
 ### PDF Analysis
 1. Open any PDF in your browser
 2. Click the CoTaskAI icon to analyze and ask questions about the document
@@ -227,6 +222,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Font Awesome](https://fontawesome.com/) for the icon library
 - [PDF.js](https://mozilla.github.io/pdf.js/) for PDF processing
 - [Dexie.js](https://dexie.org/) for IndexedDB management
+- [Dexie Cloud](https://dexie.org/cloud) for Cloud Sync
 - [Prism.js](https://prismjs.com/) for code syntax highlighting
 - [Marked.js](https://marked.js.org/) for Markdown parsing
 - All contributors who have helped improve this extension
