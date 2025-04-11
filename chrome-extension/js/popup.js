@@ -173,19 +173,6 @@ $(document).ready(() => {
         }
     };
     
-    // Listen for event when opened from floating button
-    window.addEventListener('floating-modal-opened', async () => {
-        console.log('Popup opened from floating button - reloading conversations');
-        
-        // Check if conversations are already being loaded
-        if (isLoadingConversations) return;
-        
-        isLoadingConversations = true;
-        $chatHistory.empty(); // Clear current conversations
-        await loadConversations(); // Reload conversations for current tab
-        isLoadingConversations = false;
-    });
-    
     // Listen for messages from background script (for the floating modal)
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'floating_modal_opened') {
@@ -197,7 +184,11 @@ $(document).ready(() => {
                 $chatHistory.empty(); // Clear current conversations
                 loadConversations().then(() => {
                     isLoadingConversations = false;
-                }); // Reload conversations for current tab
+                    console.log('Conversations loaded successfully in floating modal');
+                }).catch(error => {
+                    console.error('Error loading conversations:', error);
+                    isLoadingConversations = false;
+                });
             }
             
             // Send response to acknowledge receipt

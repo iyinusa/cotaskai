@@ -1,34 +1,74 @@
 // background.js - Service Worker (Manifest V3)
 // Import scripts with proper error handling and fallbacks
 try {
-  // First load dexie.min.js which is required
-  importScripts('js/dexie.min.js');
-  
-  // Create a fallback for dexie-cloud in case it fails to load
-  self.dexieCloud = {
-    configure: () => console.warn("Dexie Cloud placeholder - sync features may be limited")
-  };
-  
-  // Try to load dexie-cloud, but don't let it break everything if it fails
-  try {
-    importScripts('js/dexie-cloud.min.js');
-    console.log("Dexie Cloud loaded successfully");
-  } catch (cloudError) {
-    console.warn("Dexie Cloud import failed:", cloudError.message);
-    // Fallback already defined above, so we can continue
-  }
-  
-  // Now import database.js which depends on the above
-  importScripts('js/database.js');
+    // First load Dexie which is required
+    importScripts('js/dexie.min.js');
+    console.log("Dexie loaded successfully");
+    
+    // Make Dexie available globally in the service worker
+    if (!self.Dexie) {
+        self.Dexie = Dexie;
+        console.log("Dexie attached to global scope");
+    }
+
+    // Try to load Dexie Cloud addon
+    try {
+        importScripts('js/dexie-cloud-addon.min.js');
+        console.log("Dexie Cloud addon loaded successfully");
+        
+        // Make dexieCloud available globally in the service worker
+        if (typeof dexieCloud !== 'undefined') {
+            self.dexieCloud = dexieCloud;
+            console.log("dexieCloud attached to global scope");
+        } else {
+            console.warn("dexieCloud variable not defined after loading addon");
+        }
+    } catch (cloudError) {
+        console.warn("Dexie Cloud import failed:", cloudError.message);
+        // Continue without cloud functionality
+    }
+
+    // Now import database.js which depends on the above
+    importScripts('js/database.js');
+    console.log("Database.js loaded successfully");
+    
+    // Verify Database was properly loaded
+    if (typeof Database === 'undefined') {
+        throw new Error("Database object not defined after loading database.js");
+    }
+    
+    // Initialize database after a small delay to ensure everything is loaded
+    setTimeout(() => {
+        if (Database && typeof Database.initialize === 'function') {
+            Database.initialize()
+                .then(result => {
+                    if (result && result.success) {
+                        console.log("Database initialized successfully");
+                    } else {
+                        console.error("Database initialization returned failure", result);
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to initialize database:', err);
+                });
+        } else {
+            console.error("Database or Database.initialize is not available");
+        }
+    }, 100);
+    
 } catch (error) {
-  console.error("Critical error importing scripts:", error);
-  // Report the error so it's easier to debug
-  chrome.runtime.sendMessage({
-    action: 'service_worker_error',
-    error: error.message || 'Unknown error loading service worker scripts'
-  }).catch(() => {
-    // Suppress errors if no listeners
-  });
+    console.error("Critical error importing scripts:", error);
+    // Report the error so it's easier to debug
+    try {
+        chrome.runtime.sendMessage({
+            action: 'service_worker_error',
+            error: error.message || 'Unknown error loading service worker scripts'
+        }).catch(() => {
+            // Suppress errors if no listeners
+        });
+    } catch (e) {
+        console.error("Could not send error message", e);
+    }
 }
 
 // Initialize context menu
@@ -39,15 +79,6 @@ chrome.runtime.onInstalled.addListener(() => {
         title: "Ask CoTaskAI",
         contexts: ["selection"]
     });
-
-    // Initialize database with default values
-    if (typeof Database !== 'undefined') {
-        Database.initialize().catch(err => {
-            console.error('Failed to initialize database:', err);
-        });
-    } else {
-        console.error('Database not initialized properly');
-    }
 });
 
 // Context menu click handler
@@ -61,14 +92,26 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
 });
 
-// Handle AI context menu requests
+// Handle AI context menu requests - with safety checks
 async function handleAIContextMenuRequest(selectedText, tabId) {
     try {
+        // Check if Database is available
+        if (!Database) {
+            console.error("Database not available");
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: 'images/icon.png',
+                title: 'Database Error',
+                message: 'Database not initialized properly'
+            });
+            return;
+        }
+
         // Get settings and API keys from database
         const settings = await Database.getSettings();
         const apiKeys = await Database.getApiKeys();
         const modelProvider = getModelProvider(settings.model);
-        
+
         // Get the appropriate API key based on the model provider
         let apiKey;
         switch (modelProvider) {
@@ -101,12 +144,12 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
         }
 
         let answer;
-        
+
         // Handle API request based on the provider
         if (modelProvider === 'gemini') {
             // Use Gemini API
             const endpoint = `https://generativelanguage.googleapis.com/v1/models/${settings.model}:generateContent`;
-            
+
             const response = await fetch(`${endpoint}?key=${apiKey}`, {
                 method: 'POST',
                 headers: {
@@ -120,12 +163,12 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
                     }]
                 })
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error?.message || 'Gemini API request failed');
             }
-            
+
             const data = await response.json();
             answer = data.candidates[0].content.parts[0].text;
         } else {
@@ -149,7 +192,7 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
                 const errorData = await response.json();
                 throw new Error(errorData.error?.message || 'OpenAI API request failed');
             }
-            
+
             const data = await response.json();
             answer = data.choices[0].message.content;
         }
@@ -189,10 +232,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         case 'get_conversations':
             // Get conversations for specific URL if provided, otherwise get all
-            const getConvPromise = request.url ? 
+            const getConvPromise = request.url ?
                 Database.getConversations(request.url) :
                 Database.getAllConversations();
-            
+
             getConvPromise
                 .then(conversations => sendResponse({ conversations }))
                 .catch(error => sendResponse({ error: error.message }));
@@ -203,16 +246,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 .then(() => sendResponse({ success: true }))
                 .catch(error => sendResponse({ error: error.message }));
             return true;
-            
+
         case 'toggle_floating_button':
             // Toggle the floating button state in database
             const togglePromise = async () => {
                 const state = await Database.getFloatingButtonState();
-                const newState = request.forceState !== undefined ? 
+                const newState = request.forceState !== undefined ?
                     request.forceState : !state.enabled;
-                
+
                 await Database.setFloatingButtonState(newState);
-                
+
                 // Send message to content script to update button visibility
                 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                     if (tabs[0]?.id) {
@@ -222,24 +265,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         });
                     }
                 });
-                
+
                 return newState;
             };
-            
+
             togglePromise()
                 .then(newState => sendResponse({ success: true, enabled: newState }))
                 .catch(error => sendResponse({ error: error.message }));
             return true;
-            
+
         case 'get_floating_button_state':
             Database.getFloatingButtonState()
-                .then(state => sendResponse({ 
-                    success: true, 
+                .then(state => sendResponse({
+                    success: true,
                     enabled: state.enabled
                 }))
                 .catch(error => sendResponse({ error: error.message }));
             return true;
-            
+
         case 'get_floating_button_position':
             Database.getFloatingButtonPosition()
                 .then(position => sendResponse({
@@ -248,13 +291,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }))
                 .catch(error => sendResponse({ error: error.message }));
             return true;
-            
+
         case 'save_floating_button_position':
             Database.saveFloatingButtonPosition(request.position)
                 .then(() => sendResponse({ success: true }))
                 .catch(error => sendResponse({ error: error.message }));
             return true;
-            
+
         case 'notify_iframe_loaded':
             // Handle notification from content script that iframe has loaded
             // Send a message to all extension pages (including popups)
@@ -292,7 +335,7 @@ async function handleChatAPIRequest(query, context) {
     const settings = await Database.getSettings();
     const apiKeys = await Database.getApiKeys();
     const modelProvider = getModelProvider(settings.model);
-    
+
     // Get the appropriate API key based on the model provider
     let apiKey;
     switch (modelProvider) {
@@ -363,7 +406,7 @@ async function handleOpenAIRequest(apiKey, model, query, context) {
 async function handleGeminiRequest(apiKey, model, query, context) {
     // Use Gemini API v1 endpoint
     const endpoint = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent`;
-    
+
     const response = await fetch(`${endpoint}?key=${apiKey}`, {
         method: 'POST',
         headers: {

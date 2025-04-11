@@ -5,6 +5,7 @@
 dexie/
 /dexie/
 **/dexie/
+dexie-cloud-setup.js
 
 # Environments
 *.env

@@ -3,11 +3,10 @@
     "name": "CoTaskAI",
     "author": "I. Kennedy Yinusa",
     "description": "LLM on your browser. CoTaskAI helps you to talk to your browsing contents, summarize, and generate ideas.",
-    "version": "1.2",
+    "version": "1.4",
     "permissions": [
         "contextMenus",
         "activeTab",
-        "storage",
         "scripting",
         "notifications"
     ],
