@@ -13,6 +13,9 @@
     "host_permissions": [
         "https://api.openai.com/*",
         "https://generativelanguage.googleapis.com/*",
+        "https://api.anthropic.com/*",
+        "https://api.deepseek.com/*",
+        "https://api.grok.x.ai/*",
         "https://zhzsa0sb1.dexie.cloud/*",
         "http://*/*",
         "https://*/*",

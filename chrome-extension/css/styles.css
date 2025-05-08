@@ -112,7 +112,7 @@ body {
 /* Popup entrance and exit animations */
 .app-container {
     width: 100%;
-    height: 100%;
+    height: 650px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -852,7 +852,7 @@ body {
 @media screen and (max-width: 600px) {
     .app-container {
         width: 100vw;
-        height: 100vh;
+        height: 650px;
     }
     
     .context-panel.active {
@@ -1399,4 +1399,30 @@ select.form-control {
 .status-badge {
     margin-left: 10px;
     font-size: 0.8rem;
+}
+
+/* Styles for disabled model selection options */
+.disabled-optgroup {
+    color: #888;
+    font-style: italic;
+    position: relative;
+}
+
+.disabled-optgroup::after {
+    content: "(API key not set)";
+    font-size: 0.8em;
+    margin-left: 5px;
+    color: #c44;
+}
+
+.disabled-option {
+    color: #999 !important;
+    font-style: italic;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Custom styling for select option hover states in the disabled state */
+select option:disabled:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #999;
 }

@@ -171,6 +171,97 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
 
             const data = await response.json();
             answer = data.candidates[0].content.parts[0].text;
+        } else if (modelProvider === 'anthropic') {
+            // Use Anthropic API
+            const endpoint = "https://api.anthropic.com/v1/messages";
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: settings.model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: `Analyze this text: ${selectedText}`
+                        }
+                    ],
+                    max_tokens: 4096
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Anthropic API request failed');
+            }
+
+            const data = await response.json();
+            answer = data.content[0].text;
+        } else if (modelProvider === 'deepseek') {
+            // Use DeepSeek API
+            const endpoint = "https://api.deepseek.com/v1/chat/completions";
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: settings.model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: `Analyze this text: ${selectedText}`
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 4000
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'DeepSeek API request failed');
+            }
+
+            const data = await response.json();
+            answer = data.choices[0].message.content;
+        } else if (modelProvider === 'xai') {
+            // Use xAI API
+            const endpoint = "https://api.grok.x.ai/v1/chat/completions";
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: settings.model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: `Analyze this text: ${selectedText}`
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 4096
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'xAI API request failed');
+            }
+
+            const data = await response.json();
+            answer = data.choices[0].message.content;
         } else {
             // Default to OpenAI
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -370,6 +461,12 @@ async function handleChatAPIRequest(query, context) {
     // Handle API request based on the provider
     if (modelProvider === 'gemini') {
         return await handleGeminiRequest(apiKey, settings.model, query, context);
+    } else if (modelProvider === 'anthropic') {
+        return await handleAnthropicRequest(apiKey, settings.model, query, context);
+    } else if (modelProvider === 'deepseek') {
+        return await handleDeepSeekRequest(apiKey, settings.model, query, context);
+    } else if (modelProvider === 'xai') {
+        return await handleXAIRequest(apiKey, settings.model, query, context);
     } else {
         // Default to OpenAI for now
         return await handleOpenAIRequest(apiKey, settings.model, query, context);
@@ -428,6 +525,106 @@ async function handleGeminiRequest(apiKey, model, query, context) {
 
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
+}
+
+// Handle Anthropic API requests
+async function handleAnthropicRequest(apiKey, model, query, context) {
+    // Use Anthropic's Claude API endpoint
+    const endpoint = "https://api.anthropic.com/v1/messages";
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: "user",
+                    content: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                }
+            ],
+            max_tokens: 4096
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Anthropic API request failed');
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+}
+
+// Handle DeepSeek API requests
+async function handleDeepSeekRequest(apiKey, model, query, context) {
+    // DeepSeek API endpoint
+    const endpoint = "https://api.deepseek.com/v1/chat/completions";
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: "user",
+                    content: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'DeepSeek API request failed');
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+}
+
+// Handle xAI API requests
+async function handleXAIRequest(apiKey, model, query, context) {
+    // xAI Grok API endpoint
+    const endpoint = "https://api.grok.x.ai/v1/chat/completions";
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: "user", 
+                    content: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 4096
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'xAI API request failed');
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
 }
 
 console.log("CoTaskAI background script running");

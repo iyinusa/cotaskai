@@ -31,6 +31,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // YouTube Player functionality
+    const youtubePlayer = document.querySelector('.youtube-player');
+    const youtubeThumbnail = document.querySelector('.youtube-player-thumbnail');
+    const youtubeIframe = document.getElementById('youtube-iframe');
+    
+    if (youtubePlayer && youtubeThumbnail && youtubeIframe) {
+        youtubeThumbnail.addEventListener('click', function() {
+            youtubePlayer.classList.add('active');
+            
+            // Extract the YouTube video ID from the iframe src
+            let videoSrc = youtubeIframe.getAttribute('src');
+            
+            // Add autoplay=1 parameter to the YouTube URL to start playing automatically
+            if (videoSrc.indexOf('autoplay') === -1) {
+                videoSrc += (videoSrc.indexOf('?') > -1) ? '&autoplay=1' : '?autoplay=1';
+                youtubeIframe.setAttribute('src', videoSrc);
+            }
+        });
+    }
+    
     // FAQ accordion functionality
     const faqItems = document.querySelectorAll('.faq-item');
     if (faqItems.length > 0) {

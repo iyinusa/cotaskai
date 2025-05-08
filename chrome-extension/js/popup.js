@@ -17,6 +17,20 @@ $(document).ready(() => {
     // Add flag to prevent duplicate conversation loading
     let isLoadingConversations = false;
 
+    // Update version display from manifest
+    (function updateVersionFromManifest() {
+        const $versionElement = $('.version');
+        if ($versionElement.length) {
+            try {
+                // chrome.runtime.getManifest() is synchronous, not a Promise
+                const manifest = chrome.runtime.getManifest();
+                $versionElement.text(`v${manifest.version}`);
+            } catch (err) {
+                console.error('Error getting manifest version:', err);
+            }
+        }
+    })();
+    
     // Format timestamp to a user-friendly format
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return '';
@@ -232,7 +246,7 @@ $(document).ready(() => {
                 await Database.savePageContent(tab.url, results[0].result);
             }
         } catch (error) {
-            displayMessage(`Content Error: ${error.message}`, 'error');
+            displayMessage(`Content Error: ${error.message}. Ensure you are own a fully loaded valid browsing content (Website, PDF)`, 'error');
         }
     };
 
@@ -569,6 +583,16 @@ $(document).ready(() => {
                     syncInterval: syncInterval
                 });
                 
+                // Update model dropdown availability based on the newly saved API keys
+                updateModelDropdownAvailability(apiKeys);
+                
+                // Make sure the saved model is still selected or switch to a valid one
+                const selectedModel = $('#modelSelect').val();
+                if (selectedModel) {
+                    // Update model in the database
+                    await Database.updateSettings({ model: selectedModel });
+                }
+                
                 // Update sync status indicator
                 updateSyncStatus();
                 
@@ -828,27 +852,43 @@ $(document).ready(() => {
             displayMessageAnimated(resp.response, 'response', new Date().toISOString());
 
             // Save conversation to database through background script
-            await chrome.runtime.sendMessage({
-                action: 'save_conversation',
-                data: {
-                    query: userInput,
-                    response: resp.response,
-                    timestamp: new Date().toISOString(),
-                    tabUrl: tab.url,
-                }
-            });
+            try {
+                await chrome.runtime.sendMessage({
+                    action: 'save_conversation',
+                    data: {
+                        query: userInput,
+                        response: resp.response,
+                        timestamp: new Date().toISOString(),
+                        tabUrl: tab.url,
+                    }
+                });
 
-            // After saving conversation, trigger a sync if enabled
-            const syncSettings = await Database.getSyncSettings();
-            if (syncSettings.enabled && await Database.isAuthenticated()) {
-                // Don't show syncing UI to avoid disruption during conversation
-                const result = await Database.syncData();
-                
-                // Update the status indicator after sync
-                updateSyncStatus();
+                // After saving conversation, trigger a sync if enabled
+                const syncSettings = await Database.getSyncSettings();
+                if (syncSettings.enabled && await Database.isAuthenticated()) {
+                    // Don't show syncing UI to avoid disruption during conversation
+                    try {
+                        const result = await Database.syncData();
+                        // Update the status indicator after sync
+                        updateSyncStatus();
+                    } catch (syncError) {
+                        console.error('Sync error after conversation:', syncError);
+                        // Don't show this error to user during conversation flow
+                    }
+                }
+            } catch (saveError) {
+                console.error('Error saving conversation:', saveError);
+                // Don't interrupt the flow with this error
             }
         } catch (error) {
-            displayMessage(`Error: ${error.message}`, 'error');
+            console.error('Chat error:', error);
+            
+            // Handle specific "startsWith" error with a more user-friendly message
+            if (error.message && error.message.includes("startsWith")) {
+                displayMessage(`Error: There was a problem with the application's data flow. Please try refreshing the page or check your connection settings, ensure that right model is selected and model Key passed in settings.`, 'error');
+            } else {
+                displayMessage(`Error: ${error.message || 'Unknown error occurred'}`, 'error');
+            }
         } finally {
             stopModelThinkingAnimation();
         }
@@ -879,6 +919,9 @@ $(document).ready(() => {
                     if (converse.query) displayMessage(converse.query, 'prompt', converse.timestamp);
                     if (converse.response) displayMessage(converse.response, 'response', converse.timestamp);
                 });
+                
+                // Apply syntax highlighting to code blocks after loading all conversations
+                applyPrismSyntaxHighlighting();
             }
         } catch (error) {
             console.error("Error loading conversations:", error);
@@ -912,6 +955,9 @@ $(document).ready(() => {
                 <div class="message-content">${formattedText}</div>
             </div>
         `);
+        
+        // Apply syntax highlighting to code blocks
+        applyPrismSyntaxHighlighting();
         
         if ($chatHistory[0]) {
             $chatHistory.scrollTop($chatHistory[0].scrollHeight);
@@ -994,6 +1040,61 @@ $(document).ready(() => {
             setTimeout(() => {
                 animateTyping(text, element, index + 1, speed);
             }, randomDelay);
+        } else {
+            // Animation is complete, apply code formatting and setup copy buttons
+            setupCodeFormatting();
+        }
+    }
+
+    // Update model dropdown based on API key availability
+    function updateModelDropdownAvailability(apiKeys) {
+        // Map of provider prefixes to their API key property
+        const providerMap = {
+            'OpenAI Models': 'openai',
+            'Gemini Models': 'gemini',
+            'Anthropic Models': 'anthropic', 
+            'DeepSeek Models': 'deepseek',
+            'xAI Models': 'xai'
+        };
+        
+        // Get all optgroups in the model dropdown
+        const $modelSelect = $('#modelSelect');
+        const $optgroups = $modelSelect.find('optgroup');
+        
+        // Process each optgroup
+        $optgroups.each(function() {
+            const $optgroup = $(this);
+            const label = $optgroup.attr('label');
+            const apiKeyProperty = providerMap[label];
+            
+            if (apiKeyProperty) {
+                // If there's no API key for this provider, disable the optgroup and its options
+                const hasApiKey = apiKeys[apiKeyProperty] && apiKeys[apiKeyProperty].trim() !== '';
+                
+                if (!hasApiKey) {
+                    // Add a disabled class to the optgroup for styling
+                    $optgroup.addClass('disabled-optgroup');
+                    
+                    // Disable all options within this optgroup
+                    $optgroup.find('option').prop('disabled', true).addClass('disabled-option');
+                } else {
+                    // Enable the optgroup and its options if they were previously disabled
+                    $optgroup.removeClass('disabled-optgroup');
+                    $optgroup.find('option').prop('disabled', false).removeClass('disabled-option');
+                }
+            }
+        });
+        
+        // Check if the currently selected option is disabled
+        const $selectedOption = $modelSelect.find('option:selected');
+        if ($selectedOption.prop('disabled')) {
+            // Find the first enabled option and select it
+            const $firstEnabledOption = $modelSelect.find('option:not(:disabled):first');
+            if ($firstEnabledOption.length > 0) {
+                $modelSelect.val($firstEnabledOption.val());
+                // Trigger change event to update the saved model
+                $modelSelect.trigger('change');
+            }
         }
     }
 
@@ -1029,6 +1130,9 @@ $(document).ready(() => {
             if (apiKeys.xai) $('#xaiKey').val(apiKeys.xai).prop('type', 'password');
             if (apiKeys.deepseek) $('#deepseekKey').val(apiKeys.deepseek).prop('type', 'password');
         }
+
+        // Update the model dropdown based on available API keys
+        updateModelDropdownAvailability(apiKeys);
 
         // Set the saved model in the dropdown
         const model = settings.model || 'gpt-3.5-turbo';

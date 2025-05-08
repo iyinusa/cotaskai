@@ -82,9 +82,24 @@
                                 <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                                 <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                             </optgroup>
-                            <optgroup label="Anthropic Models"></optgroup>
-                            <optgroup label="DeepSeek Models"></optgroup>
-                            <optgroup label="xAI Models"></optgroup>
+                            <optgroup label="Anthropic Models">
+                                <option value="claude-3-opus-latest">Claude 3 Opus</option>
+                                <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
+                                <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
+                                <option value="claude-3-5-haiku-latest">Claude 3.5 Haiku</option>
+                                <option value="claude-3-5-sonnet-latest">Claude 3.5 Sonnet</option>
+                                <option value="claude-3-7-sonnet-latest">Claude 3.7 Sonnet</option>
+                            </optgroup>
+                            <optgroup label="DeepSeek Models">
+                                <option value="deepseek-chat">DeepSeek Chat</option>
+                                <option value="deepseek-coder">DeepSeek Coder</option>
+                                <option value="deepseek-reasoner">DeepSeek R1</option>
+                            </optgroup>
+                            <optgroup label="xAI Models">
+                                <option value="grok-2-vision-1212">Grok-2 Vision</option>
+                                <option value="grok-3-mini-fast-beta">Grok-3 Mini</option>
+                                <option value="grok-3-latest">Grok-3</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
@@ -138,6 +153,19 @@
                             <div class="setting-item">
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">Perplexity Sonar</div>
+                                    <a href="https://docs.perplexity.ai/guides/getting-started" target="_blank" class="api-link" title="Get Perplexity API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="perplexityKey" class="form-control" placeholder="Enter Perplexity API Key">
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">OpenAI</div>
                                     <a href="https://platform.openai.com/api-keys" target="_blank" class="api-link" title="Get OpenAI API Key">
                                         <i class="fas fa-external-link-alt"></i> Get API Key
@@ -177,19 +205,6 @@
                             <div class="setting-item">
                                 <div class="setting-header">
                                     <i class="fas fa-robot brand-icon"></i>
-                                    <div class="setting-title">xAI</div>
-                                    <a href="https://grok.x.ai/api-keys" target="_blank" class="api-link" title="Get xAI API Key">
-                                        <i class="fas fa-external-link-alt"></i> Get API Key
-                                    </a>
-                                </div>
-                                <div class="setting-input">
-                                    <input type="password" id="xaiKey" class="form-control" placeholder="Enter xAI API Key">
-                                </div>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <div class="setting-header">
-                                    <i class="fas fa-robot brand-icon"></i>
                                     <div class="setting-title">DeepSeek</div>
                                     <a href="https://platform.deepseek.com/api-keys" target="_blank" class="api-link" title="Get DeepSeek API Key">
                                         <i class="fas fa-external-link-alt"></i> Get API Key
@@ -197,6 +212,19 @@
                                 </div>
                                 <div class="setting-input">
                                     <input type="password" id="deepseekKey" class="form-control" placeholder="Enter DeepSeek API Key">
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-header">
+                                    <i class="fas fa-robot brand-icon"></i>
+                                    <div class="setting-title">xAI</div>
+                                    <a href="https://grok.x.ai/api-keys" target="_blank" class="api-link" title="Get xAI API Key">
+                                        <i class="fas fa-external-link-alt"></i> Get API Key
+                                    </a>
+                                </div>
+                                <div class="setting-input">
+                                    <input type="password" id="xaiKey" class="form-control" placeholder="Enter xAI API Key">
                                 </div>
                             </div>
                         </div>
