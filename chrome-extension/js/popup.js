@@ -1,5 +1,4 @@
 $(document).ready(() => {
-    const modelThinking = $('modelThinking');
     const $userInput = $('#prompt');
     const $sendBtn = $('#sendBtn');
     const $chatHistory = $('#chat-history');
@@ -886,8 +885,6 @@ $(document).ready(() => {
                 console.error('Error saving conversation:', saveError);
                 // Don't interrupt the flow with this error
             }
-
-            stopModelThinkingAnimation();
         } catch (error) {
             console.error('Chat error:', error);
             
@@ -1023,6 +1020,7 @@ $(document).ready(() => {
 
     // Stop thinking animation
     function stopModelThinkingAnimation() {
+        const modelThinking = document.getElementById('modelThinking');
         if (modelThinking) {
             modelThinking.style.display = 'none';
         }

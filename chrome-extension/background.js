@@ -567,6 +567,20 @@ async function handlePerplexityRequest(apiKey, model, query, context, domain) {
 
     const data = await response.json();
     var responseText = data.choices[0].message.content;
+
+    // Clean up the response text and send only parsed HTML response
+    responseText = responseText.replace(/<think.*<\/think>/g, "");
+
+    // Try get and format citations, if exit
+    const citations = data.citations;
+    if (citations && citations.length > 0) {
+        var references = `<p><strong>References:</strong></p>`;
+        for (let i = 0; i < citations.length; i++) {
+            const citation = citations[i];
+            references += `<p style="padding-left:10px;">[${i+1}] <a href="${citation}" target="_blank">${citation}</a></p>`;
+        }
+        responseText += `\n\n${references}`;
+    }
     
     return responseText;
 }

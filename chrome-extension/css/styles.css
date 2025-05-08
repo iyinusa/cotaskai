@@ -105,14 +105,14 @@ body {
     transition: background-color var(--transition-normal), color var(--transition-normal);
     line-height: 1.5;
     width: 500px;
-    height: 650px;
+    height: 600px;
     overflow: hidden;
 }
 
 /* Popup entrance and exit animations */
 .app-container {
     width: 100%;
-    height: 650px;
+    height: 600px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
