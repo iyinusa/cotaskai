@@ -115,6 +115,9 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
         // Get the appropriate API key based on the model provider
         let apiKey;
         switch (modelProvider) {
+            case 'perplexity':
+                apiKey = apiKeys.perplexity;
+                break;
             case 'gemini':
                 apiKey = apiKeys.gemini;
                 break;
@@ -146,7 +149,34 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
         let answer;
 
         // Handle API request based on the provider
-        if (modelProvider === 'gemini') {
+        if (modelProvider === 'perplexity') {
+            // Use Perplexity Sonar API
+            const endpoint = `https://api.perplexity.ai/chat/completions`;
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: settings.model,
+                    messages: [
+                        { role: "system", content: "You are a web analysis expert. Search the website and analyze the text." },
+                        {role: "user", content: `Analyze this text: ${selectedText}`}
+                    ],
+                    temperature: 0.1,
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Perplexity API request failed');
+            }
+
+            const data = await response.json();
+            answer = data.choices[0].message.content;
+        } else if (modelProvider === 'gemini') {
             // Use Gemini API
             const endpoint = `https://generativelanguage.googleapis.com/v1/models/${settings.model}:generateContent`;
 
@@ -309,7 +339,7 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.action) {
         case 'get_api_response':
-            handleChatAPIRequest(request.query, request.context)
+            handleChatAPIRequest(request.query, request.context, request.domain)
                 .then(response => sendResponse({ response }))
                 .catch(error => sendResponse({ error: error.message }));
             return true; // Keep the message channel open for async response
@@ -407,6 +437,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function getModelProvider(modelName) {
     if (modelName.startsWith('gpt-') || modelName.startsWith('o1-') || modelName.startsWith('o3-')) {
         return 'openai';
+    } else if (modelName.startsWith('sonar-')) {
+        return 'perplexity';
     } else if (modelName.startsWith('gemini-')) {
         return 'gemini';
     } else if (modelName.startsWith('claude-')) {
@@ -421,7 +453,7 @@ function getModelProvider(modelName) {
 }
 
 // Handle chat API requests from popup
-async function handleChatAPIRequest(query, context) {
+async function handleChatAPIRequest(query, context, domain) {
     // Get settings from database
     const settings = await Database.getSettings();
     const apiKeys = await Database.getApiKeys();
@@ -430,6 +462,9 @@ async function handleChatAPIRequest(query, context) {
     // Get the appropriate API key based on the model provider
     let apiKey;
     switch (modelProvider) {
+        case 'perplexity':
+            apiKey = apiKeys.perplexity;
+            break;
         case 'gemini':
             apiKey = apiKeys.gemini;
             break;
@@ -459,7 +494,9 @@ async function handleChatAPIRequest(query, context) {
     }
 
     // Handle API request based on the provider
-    if (modelProvider === 'gemini') {
+    if (modelProvider === 'perplexity') {
+        return await handlePerplexityRequest(apiKey, settings.model, query, context, domain);
+    } else if (modelProvider === 'gemini') {
         return await handleGeminiRequest(apiKey, settings.model, query, context);
     } else if (modelProvider === 'anthropic') {
         return await handleAnthropicRequest(apiKey, settings.model, query, context);
@@ -497,6 +534,41 @@ async function handleOpenAIRequest(apiKey, model, query, context) {
 
     const data = await response.json();
     return data.choices[0].message.content;
+}
+
+// Handle Perplexity API requests
+async function handlePerplexityRequest(apiKey, model, query, context, domain) {
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a web analytic expert. Search the website, analyze, and synthesize for the best insights and clarity."
+                },
+                {
+                    role: "user",
+                    content: `Search the website and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the website ${domain} and provide the answer based on the content of the website.\n3. Make sure responses are presented in well paragraphy format.\n\nFollow Steps:\n1. Search the website ${domain}, start with the current page content, and if information not found, deep search into other pages of the website.\n2. Analyze the content to ensure it addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).`
+                }
+            ],
+            search_domain_filter: [`${domain}`],
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Perplexity API request failed');
+    }
+
+    const data = await response.json();
+    var responseText = data.choices[0].message.content;
+    
+    return responseText;
 }
 
 // Handle Gemini API requests

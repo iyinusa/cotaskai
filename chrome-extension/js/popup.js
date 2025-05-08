@@ -1,5 +1,5 @@
 $(document).ready(() => {
-    const $modelThinking = $('#modelThinking');
+    const modelThinking = $('modelThinking');
     const $userInput = $('#prompt');
     const $sendBtn = $('#sendBtn');
     const $chatHistory = $('#chat-history');
@@ -246,7 +246,7 @@ $(document).ready(() => {
                 await Database.savePageContent(tab.url, results[0].result);
             }
         } catch (error) {
-            displayMessage(`Content Error: ${error.message}. Ensure you are own a fully loaded valid browsing content (Website, PDF)`, 'error');
+            displayMessage(`Ensure you are on a fully loaded valid browsing content (Website, PDF)`, 'error');
         }
     };
 
@@ -543,6 +543,7 @@ $(document).ready(() => {
                 // Collect API keys
                 const apiKeys = {
                     openai: $('#openAIKey').val().trim(),
+                    perplexity: $('#perplexityKey').val().trim(),
                     gemini: $('#geminiKey').val().trim(),
                     anthropic: $('#anthropicKey').val().trim(),
                     xai: $('#xaiKey').val().trim(),
@@ -840,9 +841,14 @@ $(document).ready(() => {
             // Get page content from database
             const pageContent = await Database.getPageContent(tab.url);
 
+            // Extract the main domain from tab URL
+            const url = new URL(tab.url);
+            const domain = url.hostname;
+            
             const resp = await chrome.runtime.sendMessage({
                 action: 'get_api_response',
                 query: userInput,
+                domain: domain, 
                 context: `${pageContent}`.trim()
             });
 
@@ -880,6 +886,8 @@ $(document).ready(() => {
                 console.error('Error saving conversation:', saveError);
                 // Don't interrupt the flow with this error
             }
+
+            stopModelThinkingAnimation();
         } catch (error) {
             console.error('Chat error:', error);
             
@@ -909,7 +917,7 @@ $(document).ready(() => {
                         <div><img alt="CoTaskAI" src="images/icon.png" /></div>
                         <p>Start a dialogue with the Website or PDF document.</p>
                         <div class="disclaimer text-muted">
-                            CoTaskAI helps you analyze text from the current page, and provide responses based on the context. Please note that you might be limited by the number of requests/token you can make to the AI service, depending on your selected model.
+                            CoTaskAI helps you analyze website context from the Current Page (<b>Perplexity models</b> captures entire domain), and provide responses based on the context.<br><br>Please note that you might be limited by the number of requests/token you can make to the AI service, depending on your selected model.
                         </div>
                     </div>
                 `);
@@ -1015,7 +1023,6 @@ $(document).ready(() => {
 
     // Stop thinking animation
     function stopModelThinkingAnimation() {
-        const modelThinking = document.getElementById('modelThinking');
         if (modelThinking) {
             modelThinking.style.display = 'none';
         }
@@ -1051,6 +1058,7 @@ $(document).ready(() => {
         // Map of provider prefixes to their API key property
         const providerMap = {
             'OpenAI Models': 'openai',
+            'Perplexity Models': 'perplexity',
             'Gemini Models': 'gemini',
             'Anthropic Models': 'anthropic', 
             'DeepSeek Models': 'deepseek',
@@ -1125,6 +1133,7 @@ $(document).ready(() => {
         // Set the saved API keys in the input fields
         if (apiKeys) {
             if (apiKeys.openai) $('#openAIKey').val(apiKeys.openai).prop('type', 'password');
+            if (apiKeys.perplexity) $('#perplexityKey').val(apiKeys.perplexity).prop('type', 'password');
             if (apiKeys.gemini) $('#geminiKey').val(apiKeys.gemini).prop('type', 'password');
             if (apiKeys.anthropic) $('#anthropicKey').val(apiKeys.anthropic).prop('type', 'password');
             if (apiKeys.xai) $('#xaiKey').val(apiKeys.xai).prop('type', 'password');
