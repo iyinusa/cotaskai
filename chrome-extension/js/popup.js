@@ -12,6 +12,9 @@ $(document).ready(() => {
     const $floatingToggleBtn = $('#floatingToggleBtn');
     const $cloudSyncIndicator = $('#cloudSyncIndicator');
     const $syncStatus = $('#syncStatus');
+
+    // Get the context type
+    let contextType = 'web';
     
     // Add flag to prevent duplicate conversation loading
     let isLoadingConversations = false;
@@ -233,6 +236,9 @@ $(document).ready(() => {
                     fullText += `\n${pageText}`;
                 }
 
+                // store context type
+                contextType = 'pdf';
+
                 // Save to database instead of chrome.storage
                 await Database.savePageContent(tab.url, fullText);
             } else {
@@ -240,6 +246,9 @@ $(document).ready(() => {
                     target: { tabId: tab.id },
                     func: () => document.body.innerText
                 });
+
+                // store context type
+                contextType = 'web';
                 
                 // Save to database instead of chrome.storage
                 await Database.savePageContent(tab.url, results[0].result);
@@ -848,6 +857,7 @@ $(document).ready(() => {
                 action: 'get_api_response',
                 query: userInput,
                 domain: domain, 
+                contextType: contextType,
                 context: `${pageContent}`.trim()
             });
 
