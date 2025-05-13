@@ -545,11 +545,11 @@ async function handlePerplexityRequest(apiKey, model, query, context, contextTyp
             messages: [
                 {
                     role: "system",
-                    content: "You are a document analytic expert. Search the document content, analyze, and synthesize for the best insights and clarity."
+                    content: "You are a document synthesizer expert. Search the document content, analyze, and synthesize for the best insights and clarity."
                 },
                 {
                     role: "user",
-                    content: `Search the document content and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the document content and provide the answer based on the context of the document.\n3. Make sure responses are presented in well paragraphy format.\n\nFollow Steps:\n1. Search the document content provided in "Context" below.\n2. Analyze the content to ensure it is use to addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).\n\nContext:\n${context}`
+                    content: `Search the document content and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the document content and provide the answer based on the context of the document.\n3. Do not search any other sources or websites.\n\nFollow Steps:\n1. Search ONLY the document content provided in "Context" below, no external websites or sources.\n2. Analyze the content to ensure it is use to addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).\n\nContext:\n${context}`
                 }
             ],
         });

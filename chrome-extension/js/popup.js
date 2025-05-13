@@ -956,7 +956,11 @@ $(document).ready(() => {
         if (sender === 'response') {
             formattedText = formatResponseText(text);
         } else {
-            formattedText = text.replace(/\n/g, '<br>');
+            // Format user messages with improved paragraph handling too
+            // First handle paragraph breaks, then handle single line breaks
+            formattedText = text.replace(/\n{2,}/g, '</p><p>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            formattedText = '<p>' + formattedText + '</p>';
         }
         
         const messageId = id ? `id="${id}"` : '';
@@ -992,7 +996,11 @@ $(document).ready(() => {
         if (sender === 'response') {
             formattedText = formatResponseText(text);
         } else {
-            formattedText = text.replace(/\n/g, '<br>');
+            // Format user messages with improved paragraph handling too
+            // First handle paragraph breaks, then handle single line breaks
+            formattedText = text.replace(/\n{2,}/g, '</p><p>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            formattedText = '<p>' + formattedText + '</p>';
         }
         
         const messageId = id ? `id="${id}"` : '';

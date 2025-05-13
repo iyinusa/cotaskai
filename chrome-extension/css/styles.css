@@ -369,6 +369,31 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+/* Paragraph styling */
+.message-content p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Ensure proper spacing between paragraphs */
+.message-content p + p {
+    margin-top: 0.8em;
+}
+
+/* Prevent excessive line breaks */
+.message-content br {
+    line-height: 1.6;
+}
+
+/* Fix for consecutive line breaks - only show one */
+.message-content br + br {
+    display: none;
+}
+
 /* Model Thinking */
 #modelThinking {
     display: none;
