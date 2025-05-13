@@ -1,5 +1,4 @@
 $(document).ready(() => {
-    const modelThinking = $('modelThinking');
     const $userInput = $('#prompt');
     const $sendBtn = $('#sendBtn');
     const $chatHistory = $('#chat-history');
@@ -13,6 +12,9 @@ $(document).ready(() => {
     const $floatingToggleBtn = $('#floatingToggleBtn');
     const $cloudSyncIndicator = $('#cloudSyncIndicator');
     const $syncStatus = $('#syncStatus');
+
+    // Get the context type
+    let contextType = 'web';
     
     // Add flag to prevent duplicate conversation loading
     let isLoadingConversations = false;
@@ -234,6 +236,9 @@ $(document).ready(() => {
                     fullText += `\n${pageText}`;
                 }
 
+                // store context type
+                contextType = 'pdf';
+
                 // Save to database instead of chrome.storage
                 await Database.savePageContent(tab.url, fullText);
             } else {
@@ -241,6 +246,9 @@ $(document).ready(() => {
                     target: { tabId: tab.id },
                     func: () => document.body.innerText
                 });
+
+                // store context type
+                contextType = 'web';
                 
                 // Save to database instead of chrome.storage
                 await Database.savePageContent(tab.url, results[0].result);
@@ -849,6 +857,7 @@ $(document).ready(() => {
                 action: 'get_api_response',
                 query: userInput,
                 domain: domain, 
+                contextType: contextType,
                 context: `${pageContent}`.trim()
             });
 
@@ -886,8 +895,6 @@ $(document).ready(() => {
                 console.error('Error saving conversation:', saveError);
                 // Don't interrupt the flow with this error
             }
-
-            stopModelThinkingAnimation();
         } catch (error) {
             console.error('Chat error:', error);
             
@@ -949,7 +956,11 @@ $(document).ready(() => {
         if (sender === 'response') {
             formattedText = formatResponseText(text);
         } else {
-            formattedText = text.replace(/\n/g, '<br>');
+            // Format user messages with improved paragraph handling too
+            // First handle paragraph breaks, then handle single line breaks
+            formattedText = text.replace(/\n{2,}/g, '</p><p>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            formattedText = '<p>' + formattedText + '</p>';
         }
         
         const messageId = id ? `id="${id}"` : '';
@@ -985,7 +996,11 @@ $(document).ready(() => {
         if (sender === 'response') {
             formattedText = formatResponseText(text);
         } else {
-            formattedText = text.replace(/\n/g, '<br>');
+            // Format user messages with improved paragraph handling too
+            // First handle paragraph breaks, then handle single line breaks
+            formattedText = text.replace(/\n{2,}/g, '</p><p>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            formattedText = '<p>' + formattedText + '</p>';
         }
         
         const messageId = id ? `id="${id}"` : '';
@@ -1023,6 +1038,7 @@ $(document).ready(() => {
 
     // Stop thinking animation
     function stopModelThinkingAnimation() {
+        const modelThinking = document.getElementById('modelThinking');
         if (modelThinking) {
             modelThinking.style.display = 'none';
         }

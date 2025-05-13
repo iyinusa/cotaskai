@@ -192,8 +192,22 @@ function formatResponseText(text) {
         return tableHTML;
     });
 
-    // Convert newlines to <br> for remaining text
-    text = text.replace(/\n/g, '<br>');
+    // Handle paragraph breaks (two or more consecutive newlines) and single line breaks
+    // This improves text formatting by distinguishing between paragraphs and line breaks
+    // text = text.replace(/\n{2,}/g, '</p><p>');  // Convert 2+ consecutive newlines to paragraph breaks
+    text = text.replace(/\n/g, '<br>');         // Convert remaining single newlines to <br>
+    
+    // Remove excessive <br> tags (more than one in a row)
+    text = text.replace(/(<br\s*\/?>\s*){2,}/gi, '<br>');
+    
+    // Fix any raw br tags that might be in the text
+    text = text.replace(/<br\/>/g, '<br>');
+    
+    // Wrap the entire content in paragraph tags if not already wrapped
+    if (!text.startsWith('<p>') && !text.startsWith('<h') && !text.startsWith('<ul') && 
+        !text.startsWith('<ol') && !text.startsWith('<blockquote') && !text.startsWith('<div')) {
+        text = '<p>' + text + '</p>';
+    }
 
     return text;
 }

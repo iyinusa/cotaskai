@@ -74,11 +74,11 @@ try {
 // Initialize context menu
 chrome.runtime.onInstalled.addListener(() => {
     // Create right-click context menu
-    chrome.contextMenus.create({
-        id: "askAI",
-        title: "Ask CoTaskAI",
-        contexts: ["selection"]
-    });
+    // chrome.contextMenus.create({
+    //     id: "askAI",
+    //     title: "Ask CoTaskAI",
+    //     contexts: ["selection"]
+    // });
 });
 
 // Context menu click handler
@@ -339,7 +339,7 @@ async function handleAIContextMenuRequest(selectedText, tabId) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.action) {
         case 'get_api_response':
-            handleChatAPIRequest(request.query, request.context, request.domain)
+            handleChatAPIRequest(request.query, request.context, request.contextType, request.domain)
                 .then(response => sendResponse({ response }))
                 .catch(error => sendResponse({ error: error.message }));
             return true; // Keep the message channel open for async response
@@ -453,7 +453,7 @@ function getModelProvider(modelName) {
 }
 
 // Handle chat API requests from popup
-async function handleChatAPIRequest(query, context, domain) {
+async function handleChatAPIRequest(query, context, contextType, domain) {
     // Get settings from database
     const settings = await Database.getSettings();
     const apiKeys = await Database.getApiKeys();
@@ -495,7 +495,7 @@ async function handleChatAPIRequest(query, context, domain) {
 
     // Handle API request based on the provider
     if (modelProvider === 'perplexity') {
-        return await handlePerplexityRequest(apiKey, settings.model, query, context, domain);
+        return await handlePerplexityRequest(apiKey, settings.model, query, context, contextType, domain);
     } else if (modelProvider === 'gemini') {
         return await handleGeminiRequest(apiKey, settings.model, query, context);
     } else if (modelProvider === 'anthropic') {
@@ -537,14 +537,25 @@ async function handleOpenAIRequest(apiKey, model, query, context) {
 }
 
 // Handle Perplexity API requests
-async function handlePerplexityRequest(apiKey, model, query, context, domain) {
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
+async function handlePerplexityRequest(apiKey, model, query, context, contextType, domain) {
+    if (contextType === "pdf") {
+        // Use Perplexity Sonar API with web content context
+        payload = JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a document synthesizer expert. Search the document content, analyze, and synthesize for the best insights and clarity."
+                },
+                {
+                    role: "user",
+                    content: `Search the document content and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the document content and provide the answer based on the context of the document.\n3. Do not search any other sources or websites.\n\nFollow Steps:\n1. Search ONLY the document content provided in "Context" below, no external websites or sources.\n2. Analyze the content to ensure it is use to addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).\n\nContext:\n${context}`
+                }
+            ],
+        });
+    } else {
+        // Use Perplexity Sonar API with website deep context contexts
+        payload = JSON.stringify({
             model: model,
             messages: [
                 {
@@ -553,11 +564,20 @@ async function handlePerplexityRequest(apiKey, model, query, context, domain) {
                 },
                 {
                     role: "user",
-                    content: `Search the website and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the website ${domain} and provide the answer based on the content of the website.\n3. Make sure responses are presented in well paragraphy format.\n\nFollow Steps:\n1. Search the website ${domain}, start with the current page content, and if information not found, deep search into other pages of the website.\n2. Analyze the content to ensure it addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).`
+                    content: `Search the website and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the website ${domain} and provide the answer based on the content of the website.\n3. Make sure responses are presented in well paragraphy format.\n\nFollow Steps:\n1. Search the website ${domain}, start with the current page content, and if information not found, deep search into other pages of the website.\n2. Analyze the content to ensure it is use to addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).`
                 }
             ],
             search_domain_filter: [`${domain}`],
-        })
+        });
+    }
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: payload
     });
 
     if (!response.ok) {
@@ -567,6 +587,20 @@ async function handlePerplexityRequest(apiKey, model, query, context, domain) {
 
     const data = await response.json();
     var responseText = data.choices[0].message.content;
+
+    // Parse the response text - remove <think> tags and their contents
+    responseText = responseText.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+
+    // Try get and format citations, if exit
+    const citations = data.citations;
+    if (citations && citations.length > 0) {
+        var references = `<p><strong>References:</strong></p>`;
+        for (let i = 0; i < citations.length; i++) {
+            const citation = citations[i];
+            references += `<p style="padding-left:10px;">[${i+1}] <a href="${citation}" target="_blank">${citation}</a></p>`;
+        }
+        responseText += `\n\n${references}`;
+    }
     
     return responseText;
 }
