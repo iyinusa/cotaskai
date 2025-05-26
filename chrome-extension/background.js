@@ -522,7 +522,7 @@ async function handleOpenAIRequest(apiKey, model, query, context) {
             model: model,
             messages: [{
                 role: "user",
-                content: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                content: `Context: ${context}\n\nQuestion: ${query}\n\nFormat your response using professional markdown, including appropriate use of headings, bold, italic, lists, code blocks, tables, and other markdown formatting as needed to present the information clearly and professionally.`
             }]
         })
     });
@@ -549,7 +549,7 @@ async function handlePerplexityRequest(apiKey, model, query, context, contextTyp
                 },
                 {
                     role: "user",
-                    content: `Search the document content and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the document content and provide the answer based on the context of the document.\n3. Do not search any other sources or websites.\n\nFollow Steps:\n1. Search ONLY the document content provided in "Context" below, no external websites or sources.\n2. Analyze the content to ensure it is use to addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).\n\nContext:\n${context}`
+                    content: `Search the document content and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the document content and provide the answer based on the context of the document.\n3. Do not search any other sources or websites.\n\nFollow Steps:\n1. Search ONLY the document content provided in "Context" below, no external websites or sources.\n2. Analyze the content to ensure it addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Format your response using professional markdown, including appropriate use of headings, bold, italic, lists, code blocks, tables, and other markdown formatting as needed.\n\nContext:\n${context}`
                 }
             ],
         });
@@ -564,7 +564,7 @@ async function handlePerplexityRequest(apiKey, model, query, context, contextTyp
                 },
                 {
                     role: "user",
-                    content: `Search the website and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the website ${domain} and provide the answer based on the content of the website.\n3. Make sure responses are presented in well paragraphy format.\n\nFollow Steps:\n1. Search the website ${domain}, start with the current page content, and if information not found, deep search into other pages of the website.\n2. Analyze the content to ensure it is use to addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Provide only final answer in HTML format, do not include any processing or thinking step(s).`
+                    content: `Search the website and respond to this enquiry: ${query}\n\nStrict Rules:\n1. Provide only final answer, do not include any processing or thinking step(s).\n2. You must search only the website ${domain} and provide the answer based on the content of the website.\n\nFollow Steps:\n1. Search the website ${domain}, start with the current page content, and if information not found, deep search into other pages of the website.\n2. Analyze the content to ensure it addresses the query.\n3. Synthesize for the best insights and clarity.\n4. Format your response using professional markdown, including appropriate use of headings, bold, italic, lists, code blocks, tables, and other markdown formatting as needed to present the information clearly and professionally.`
                 }
             ],
             search_domain_filter: [`${domain}`],
@@ -618,7 +618,7 @@ async function handleGeminiRequest(apiKey, model, query, context) {
         body: JSON.stringify({
             contents: [{
                 parts: [{
-                    text: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                    text: `Context: ${context}\n\nQuestion: ${query}\n\nFormat your response using professional markdown, including appropriate use of headings, bold, italic, lists, code blocks, tables, and other markdown formatting as needed to present the information clearly and professionally.`
                 }]
             }]
         })
@@ -645,13 +645,12 @@ async function handleAnthropicRequest(apiKey, model, query, context) {
             'x-api-key': apiKey,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
+        },            body: JSON.stringify({
             model: model,
             messages: [
                 {
                     role: "user",
-                    content: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                    content: `Context: ${context}\n\nQuestion: ${query}\n\nFormat your response using professional markdown, including appropriate use of headings, bold, italic, lists, code blocks, tables, and other markdown formatting as needed to present the information clearly and professionally.`
                 }
             ],
             max_tokens: 4096
@@ -710,13 +709,12 @@ async function handleXAIRequest(apiKey, model, query, context) {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
+        },            body: JSON.stringify({
             model: model,
             messages: [
                 {
                     role: "user", 
-                    content: `Context: ${context}\n\nQuestion: ${query}\n\nMake sure responses are presented in well paragraphy format.`
+                    content: `Context: ${context}\n\nQuestion: ${query}\n\nFormat your response using professional markdown, including appropriate use of headings, bold, italic, lists, code blocks, tables, and other markdown formatting as needed to present the information clearly and professionally.`
                 }
             ],
             temperature: 0.7,

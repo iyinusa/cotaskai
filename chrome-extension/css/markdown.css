@@ -1,0 +1,264 @@
+/* Markdown Styling for AI Responses */
+
+/* General typography in markdown content */
+.message-content {
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+}
+
+/* Headings in markdown */
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: 400;
+    line-height: 1.0;
+    color: var(--text-primary);
+}
+
+.message-content h1 { font-size: 1.75em; }
+.message-content h2 { font-size: 1.5em; }
+.message-content h3 { font-size: 1.25em; }
+.message-content h4 { font-size: 1.15em; }
+.message-content h5 { font-size: 1.05em; }
+.message-content h6 { font-size: 1em; }
+
+/* First heading doesn't need top margin */
+.message-content h1:first-child,
+.message-content h2:first-child,
+.message-content h3:first-child,
+.message-content h4:first-child,
+.message-content h5:first-child,
+.message-content h6:first-child {
+    margin-top: 0;
+}
+
+/* Paragraphs in markdown */
+.message-content p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Links in markdown */
+.message-content a,
+.message-content .ai-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.message-content a:hover,
+.message-content .ai-link:hover {
+    border-bottom-color: var(--primary-color);
+}
+
+[data-theme="dark"] .message-content a,
+[data-theme="dark"] .message-content .ai-link {
+    color: var(--primary-color);
+}
+
+/* Bold and Italic text */
+.message-content strong {
+    font-weight: 600;
+}
+
+.message-content em {
+    font-style: italic;
+}
+
+/* Lists in markdown */
+.message-content ul,
+.message-content ol,
+.message-content .ai-list {
+    margin: 0.75em 0;
+    padding-left: 1.5em;
+}
+
+.message-content ul li,
+.message-content ol li,
+.message-content .ai-list li {
+    margin-bottom: 0.5em;
+    line-height: 1.5;
+}
+
+/* Nested lists */
+.message-content ul ul,
+.message-content ol ol,
+.message-content ul ol,
+.message-content ol ul {
+    margin: 0.5em 0 0.5em 1em;
+}
+
+/* Blockquotes in markdown */
+.message-content blockquote,
+.message-content .ai-blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    border-left: 4px solid var(--primary-color);
+    background-color: rgba(0, 0, 0, 0.03);
+    font-style: italic;
+}
+
+[data-theme="dark"] .message-content blockquote,
+[data-theme="dark"] .message-content .ai-blockquote {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Tables in markdown */
+.message-content .table-container {
+    margin: 1em 0;
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+}
+
+.message-content .ai-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 0.95em;
+}
+
+.message-content .ai-table th,
+.message-content .ai-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.message-content .ai-table th {
+    background-color: rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+}
+
+[data-theme="dark"] .message-content .ai-table th {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.message-content .ai-table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .message-content .ai-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Code Block Styling */
+.message-content .code-block-container {
+    margin: 1em 0;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .message-content .code-block-container {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.message-content .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .message-content .code-header {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.message-content .code-language {
+    text-transform: uppercase;
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.message-content .copy-code-btn {
+    cursor: pointer;
+    padding: 2px 8px;
+    font-size: 0.85em;
+    border-radius: var(--radius-sm);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.message-content .copy-code-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.message-content .copy-code-btn.copied {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.message-content pre {
+    margin: 0;
+    padding: 12px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    line-height: 1.5;
+    background-color: transparent;
+}
+
+.message-content pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre;
+}
+
+.message-content .line-number {
+    display: inline-block;
+    width: 2em;
+    text-align: right;
+    color: var(--text-tertiary);
+    user-select: none;
+    margin-right: 1em;
+    opacity: 0.5;
+}
+
+/* Inline code */
+.message-content code.inline-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .message-content code.inline-code {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Horizontal Rule */
+.message-content hr {
+    margin: 1.5em 0;
+    border: 0;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Images in markdown */
+.message-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    margin: 1em 0;
+}

@@ -204,7 +204,9 @@ blockquote {
   border-spacing: 0;
   font-size: 14px;
   margin: 0;
-  white-space: nowrap;
+  width: 100%;
+  white-space: normal;
+  table-layout: auto;
 }
 
 .ai-table thead {
