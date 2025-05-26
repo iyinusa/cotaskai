@@ -34,6 +34,167 @@ function deepFormating(text) {
  */
 function formatResponseText(text) {
     if (!text) return '';
+    
+    // Configure marked.js options for enhanced markdown support
+    marked.setOptions({
+        renderer: new marked.Renderer(),
+        highlight: function(code, lang) {
+            // Use Prism.js for syntax highlighting if available
+            if (Prism && Prism.languages[lang]) {
+                return Prism.highlight(code, Prism.languages[lang], lang);
+            }
+            return code;
+        },
+        pedantic: false,
+        gfm: true, // GitHub Flavored Markdown
+        breaks: true, // Convert line breaks to <br>
+        sanitize: false, // Don't sanitize HTML - we control the content
+        smartLists: true, // Use smart list behavior
+        smartypants: true, // Use smart punctuation like quotes and dashes
+        xhtml: false
+    });
+    
+    // Create a custom renderer for enhanced markdown features
+    const renderer = new marked.Renderer();
+    
+    // Enhanced code block rendering with language detection, copy button and line numbers
+    renderer.code = function(code, language) {
+        // Format code with proper line breaks for certain statements
+        code = formatCodeWithProperLineBreaks(code);
+        
+        // Comprehensive language map for syntax highlighting
+        const languageMap = {
+            'js': 'javascript',
+            'ts': 'typescript',
+            'py': 'python',
+            'rb': 'ruby',
+            'cs': 'csharp',
+            'cpp': 'cpp',
+            'c++': 'cpp',
+            'c': 'c',
+            'php': 'php',
+            'go': 'go',
+            'rust': 'rust',
+            'java': 'java',
+            'sh': 'bash',
+            'bash': 'bash',
+            'shell': 'bash',
+            'zsh': 'bash',
+            'html': 'html',
+            'xml': 'xml',
+            'css': 'css',
+            'scss': 'scss',
+            'sass': 'sass',
+            'less': 'less',
+            'json': 'json',
+            'yaml': 'yaml',
+            'yml': 'yaml',
+            'md': 'markdown',
+            'markdown': 'markdown',
+            'sql': 'sql',
+            'swift': 'swift',
+            'kotlin': 'kotlin',
+            'dart': 'dart',
+            'r': 'r',
+            'dockerfile': 'dockerfile',
+            'docker': 'dockerfile',
+            'plaintext': 'plaintext',
+            'text': 'plaintext'
+        };
+        
+        // Get proper language display name and class
+        const displayLang = language ? (language.toLowerCase() in languageMap ? languageMap[language.toLowerCase()] : language) : 'plaintext';
+        const languageClass = language ? `language-${language.toLowerCase() in languageMap ? languageMap[language.toLowerCase()] : language}` : '';
+        
+        // Add line numbers to the code
+        const lines = code.split('\n');
+        let numberedCode = '';
+        
+        // Process each line with proper line breaks for display
+        lines.forEach((line, index) => {
+            numberedCode += `<span class="line-number">${index + 1}</span>${line}${index < lines.length - 1 ? '\n' : ''}`;
+        });
+        
+        return `<div class="code-block-container">
+            <div class="code-header clearfix">
+                <span class="copy-code-btn pull-right">Copy</span>
+                <span class="code-language">${displayLang}</span>
+            </div>
+            <pre class="code-block line-numbers"><code class="${languageClass}">${numberedCode}</code></pre>
+        </div>`;
+    };
+    
+    // Enhanced table renderer with responsive container
+    renderer.table = function(header, body) {
+        return '<div class="table-container"><table class="ai-table">' +
+            (header ? '<thead>' + header + '</thead>' : '') +
+            '<tbody>' + body + '</tbody>' +
+            '</table></div>';
+    };
+    
+    // Enhanced table cell renderer to ensure proper content
+    renderer.tablecell = function(content, flags) {
+        const type = flags.header ? 'th' : 'td';
+        const tag = flags.align
+            ? '<' + type + ' align="' + flags.align + '">'
+            : '<' + type + '>';
+        return tag + content + '</' + type + '>';
+    };
+    
+    // Enhanced link renderer with proper attributes for security and UX
+    renderer.link = function(href, title, text) {
+        const titleAttr = title ? ` title="${title}"` : '';
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="ai-link"${titleAttr}>${text}</a>`;
+    };
+    
+    // Enhanced list renderer
+    renderer.list = function(body, ordered, start) {
+        const tag = ordered ? 'ol' : 'ul';
+        const startAttr = (ordered && start) ? ` start="${start}"` : '';
+        return `<${tag} class="ai-list"${startAttr}>${body}</${tag}>`;
+    };
+    
+    // Enhanced paragraph renderer
+    renderer.paragraph = function(text) {
+        return `<p>${text}</p>`;
+    };
+    
+    // Enhanced blockquote renderer
+    renderer.blockquote = function(quote) {
+        return `<blockquote class="ai-blockquote">${quote}</blockquote>`;
+    };
+    
+    // Enhanced heading renderer
+    renderer.heading = function(text, level) {
+        return `<h${level}>${text}</h${level}>`;
+    };
+    
+    // Set the custom renderer
+    marked.setOptions({ renderer: renderer });
+    
+    try {
+        // Parse markdown with marked.js
+        let formattedHTML = marked(text);
+        
+        // Ensure proper styling for inline code
+        formattedHTML = formattedHTML.replace(/<code>([^<]+)<\/code>/g, '<code class="inline-code">$1</code>');
+        
+        return formattedHTML;
+    } catch (error) {
+        console.error('Error parsing markdown:', error);
+        
+        // Fallback to basic formatting if marked.js fails
+        return basicMarkdownFormatting(text);
+    }
+}
+
+/**
+ * Basic markdown formatting fallback if marked.js fails
+ * @param {string} text - The text to format
+ * @returns {string} - Formatted HTML
+ */
+function basicMarkdownFormatting(text) {
+    if (!text) return '';
 
     // Process code blocks with triple backticks
     text = text.replace(/```([\s\S]*?)```/g, function (match, codeContent) {
@@ -48,10 +209,10 @@ function formatResponseText(text) {
             processedCode = codeContent.substring(firstLine.length).trim();
         }
 
-        // Format code with proper line breaks for certain statements
+        // Format code with proper line breaks 
         processedCode = formatCodeWithProperLineBreaks(processedCode);
 
-        // Escape HTML in code blocks
+        // Escape HTML
         processedCode = processedCode
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -59,74 +220,124 @@ function formatResponseText(text) {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
 
-        // Add line numbers to the code
-        const lines = processedCode.split('\n');
-        let numberedCode = '';
-
-        // Process each line with proper line breaks for display
-        lines.forEach((line, index) => {
-            numberedCode += `<span class="line-number">${index + 1}</span>${line}${index < lines.length - 1 ? '\n' : ''}`;
-        });
-
-        // Map common language shortcuts to their Prism.js language identifier
-        const languageMap = {
-            'js': 'javascript',
-            'ts': 'typescript',
-            'py': 'python',
-            'rb': 'ruby',
-            'cs': 'csharp',
-            'cpp': 'cpp',
-            'php': 'php',
-            'go': 'go',
-            'rust': 'rust',
-            'java': 'java',
-            'sh': 'bash',
-            'bash': 'bash',
-            'html': 'html',
-            'css': 'css',
-            'json': 'json',
-            'yaml': 'yaml',
-            'yml': 'yaml',
-            'md': 'markdown',
-            'sql': 'sql'
-        };
-
-        // Get proper language display name and class
-        const languageClass = language ? `language-${language in languageMap ? languageMap[language] : language}` : '';
-        const displayLang = language ? (language in languageMap ? languageMap[language] : language) : 'plaintext';
-
         return `<div class="code-block-container">
             <div class="code-header clearfix">
-                <span class="copy-code-btn pull-right">
-                    Copy
-                </span>
-                <span class="code-language">${displayLang}</span>
+                <span class="copy-code-btn pull-right">Copy</span>
+                <span class="code-language">${language || 'plaintext'}</span>
             </div>
-            <pre class="code-block line-numbers"><code class="${languageClass}">${processedCode}</code></pre>
+            <pre class="code-block"><code>${processedCode}</code></pre>
         </div>`;
     });
 
-    // Process inline code
+    // Process tables - improved implementation
+    // First, find all table blocks (sequences of lines starting with |)
+    const tableRegex = /(^\|.+\|\r?\n)+/gm;
+    text = text.replace(tableRegex, function(tableBlock) {
+        const rows = tableBlock.trim().split(/\r?\n/);
+        
+        if (rows.length < 2) return tableBlock; // Not a proper table, return as is
+        
+        let hasHeader = false;
+        let headerRow = '';
+        let bodyRows = '';
+        
+        rows.forEach((row, index) => {
+            // Trim the row and remove leading/trailing |
+            const trimmedRow = row.trim().replace(/^\||\|$/g, '');
+            
+            // Split into cells
+            const cells = trimmedRow.split('|').map(cell => cell.trim());
+            
+            // Check if this is a separator row (contains only dashes and colons)
+            if (index === 1 && /^[\s\-:]+$/.test(trimmedRow.replace(/\|/g, ''))) {
+                hasHeader = true;
+                return; // Skip the separator row
+            }
+            
+            // Create HTML row
+            const isHeader = hasHeader && index === 0;
+            const cellTag = isHeader ? 'th' : 'td';
+            const cellsHtml = cells.map(cell => `<${cellTag}>${cell}</${cellTag}>`).join('');
+            const rowHtml = `<tr>${cellsHtml}</tr>`;
+            
+            if (isHeader) {
+                headerRow = rowHtml;
+            } else {
+                bodyRows += rowHtml;
+            }
+        });
+        
+        // Create the complete table HTML
+        return `<div class="table-container"><table class="ai-table">
+            ${headerRow ? `<thead>${headerRow}</thead>` : ''}
+            <tbody>${bodyRows}</tbody>
+        </table></div>`;
+    });
+
+    // Process inline code (must be done after table processing)
     text = text.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
 
     // Process links
     text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="ai-link">$1</a>');
 
-    // Process formatting
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // Process formatting - bold and italic (with variations)
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // **bold**
+    text = text.replace(/\_\_(.*?)\_\_/g, '<strong>$1</strong>');  // __bold__
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');             // *italic*
+    text = text.replace(/\_(.*?)\_/g, '<em>$1</em>');             // _italic_
+    text = text.replace(/~~(.*?)~~/g, '<del>$1</del>');           // ~~strikethrough~~
 
-    // Process lists
-    text = text.replace(/^[\s]*[-*][\s]+(.*?)$/gm, '<li>$1</li>');
-    text = text.replace(/(<li>.*?<\/li>)\s+(?=<li>)/gs, '$1');
-    text = text.replace(/(<li>.*?<\/li>)+/gs, '<ul class="ai-list">$&</ul>');
+    // Process horizontal rules
+    text = text.replace(/^(\s*[-*_]){3,}\s*$/gm, '<hr>');
 
-    // Process ordered lists
-    text = text.replace(/^[\s]*(\d+)\.[\s]+(.*?)$/gm, '<li>$2</li>');
-    text = text.replace(/(<li>.*?<\/li>)\s+(?=<li>)/gs, '$1');
-    text = text.replace(/(<li>.*?<\/li>)+/gs, '<ol class="ai-list">$&</ol>');
-
-    // Process headings
+    // Process unordered lists (with different markers)
+    text = text.replace(/^[\s]*[-*+][\s]+(.*?)$/gm, '<li>$1</li>');
+    
+    // Process ordered lists (with any number)
+    text = text.replace(/^[\s]*\d+\.[\s]+(.*?)$/gm, '<li>$1</li>');
+    
+    // Group adjacent li elements into lists
+    // First clean up any whitespace between list items
+    text = text.replace(/(<\/li>)\s+(<li>)/g, '$1$2');
+    
+    // Find unordered list groups and wrap them
+    let lastIndex = 0;
+    let inOrderedList = false;
+    let result = '';
+    
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        if (line.startsWith('<li>')) {
+            // Check if this is the start of a list
+            if (!inOrderedList) {
+                // Determine if this is an ordered or unordered list by checking the previous line
+                const prevLine = i > 0 ? lines[i-1] : '';
+                const isOrdered = /^\s*\d+\./.test(prevLine);
+                result += isOrdered ? '<ol class="ai-list">' : '<ul class="ai-list">';
+                inOrderedList = true;
+            }
+            result += line;
+        } else {
+            // End the list if we were in one
+            if (inOrderedList) {
+                const isOrdered = result.endsWith('</li>') && /^\s*\d+\./.test(lines[i-2] || '');
+                result += isOrdered ? '</ol>' : '</ul>';
+                inOrderedList = false;
+            }
+            result += line + '\n';
+        }
+    }
+    
+    // Close any open list at the end
+    if (inOrderedList) {
+        result += '</ul>';
+    }
+    
+    text = result;
+    
+    // Process headings (all levels)
     text = text.replace(/^#{6}\s+(.*?)$/gm, '<h6>$1</h6>');
     text = text.replace(/^#{5}\s+(.*?)$/gm, '<h5>$1</h5>');
     text = text.replace(/^#{4}\s+(.*?)$/gm, '<h4>$1</h4>');
@@ -134,74 +345,16 @@ function formatResponseText(text) {
     text = text.replace(/^#{2}\s+(.*?)$/gm, '<h2>$1</h2>');
     text = text.replace(/^#{1}\s+(.*?)$/gm, '<h1>$1</h1>');
 
-    // Process blockquotes
+    // Process blockquotes (multi-line support)
     text = text.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
+    text = text.replace(/(<\/blockquote>)\s+(<blockquote>)/g, '<br>'); // Join adjacent blockquotes
 
-    // Process markdown tables
-    // This regex finds table blocks with pipe-separated content
-    const tableRegex = /^\|(.+)\|\s*\n\|[-:\s|]+\|\s*\n(\|.+\|\s*\n)+/gm;
-
-    text = text.replace(tableRegex, function (tableBlock) {
-        // Split the table into rows
-        const rows = tableBlock.trim().split('\n');
-
-        // Extract header row and alignment row
-        const headerRow = rows[0];
-        const alignmentRow = rows[1];
-        const dataRows = rows.slice(2);
-
-        // Process header cells
-        const headerCells = headerRow.split('|').slice(1, -1).map(cell => cell.trim());
-
-        // Determine column alignments from the alignment row
-        // (default left, :--: for center, --: for right)
-        const alignments = alignmentRow.split('|').slice(1, -1).map(cell => {
-            cell = cell.trim();
-            if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
-            if (cell.endsWith(':')) return 'right';
-            return 'left';
-        });
-
-        // Start building the HTML table
-        let tableHTML = '<div class="table-container"><table class="ai-table">';
-
-        // Build the header
-        tableHTML += '<thead><tr>';
-        headerCells.forEach((cell, index) => {
-            const alignment = alignments[index] || 'left';
-            tableHTML += `<th style="text-align: ${alignment}">${cell}</th>`;
-        });
-        tableHTML += '</tr></thead>';
-
-        // Build the body
-        tableHTML += '<tbody>';
-        dataRows.forEach(row => {
-            const cells = row.split('|').slice(1, -1).map(cell => cell.trim());
-            tableHTML += '<tr>';
-            cells.forEach((cell, index) => {
-                const alignment = alignments[index] || 'left';
-                tableHTML += `<td style="text-align: ${alignment}">${cell}</td>`;
-            });
-            tableHTML += '</tr>';
-        });
-        tableHTML += '</tbody>';
-
-        // Close the table
-        tableHTML += '</table></div>';
-
-        return tableHTML;
-    });
-
-    // Handle paragraph breaks (two or more consecutive newlines) and single line breaks
-    // This improves text formatting by distinguishing between paragraphs and line breaks
-    // text = text.replace(/\n{2,}/g, '</p><p>');  // Convert 2+ consecutive newlines to paragraph breaks
-    text = text.replace(/\n/g, '<br>');         // Convert remaining single newlines to <br>
+    // Handle paragraph breaks and line breaks
+    text = text.replace(/\n{2,}/g, '</p><p>'); 
+    text = text.replace(/\n/g, '<br>');
     
-    // Remove excessive <br> tags (more than one in a row)
+    // Remove excessive <br> tags
     text = text.replace(/(<br\s*\/?>\s*){2,}/gi, '<br>');
-    
-    // Fix any raw br tags that might be in the text
-    text = text.replace(/<br\/>/g, '<br>');
     
     // Wrap the entire content in paragraph tags if not already wrapped
     if (!text.startsWith('<p>') && !text.startsWith('<h') && !text.startsWith('<ul') && 

@@ -1074,7 +1074,7 @@ $(document).ready(() => {
         // Map of provider prefixes to their API key property
         const providerMap = {
             'OpenAI Models': 'openai',
-            'Perplexity Models': 'perplexity',
+            'Perplexity Sonar Models': 'perplexity',
             'Gemini Models': 'gemini',
             'Anthropic Models': 'anthropic', 
             'DeepSeek Models': 'deepseek',
@@ -1084,6 +1084,9 @@ $(document).ready(() => {
         // Get all optgroups in the model dropdown
         const $modelSelect = $('#modelSelect');
         const $optgroups = $modelSelect.find('optgroup');
+        
+        // Ensure apiKeys is defined
+        apiKeys = apiKeys || {};
         
         // Process each optgroup
         $optgroups.each(function() {
@@ -1100,11 +1103,17 @@ $(document).ready(() => {
                     $optgroup.addClass('disabled-optgroup');
                     
                     // Disable all options within this optgroup
-                    $optgroup.find('option').prop('disabled', true).addClass('disabled-option');
+                    $optgroup.find('option').each(function() {
+                        $(this).prop('disabled', true).addClass('disabled-option');
+                    });
                 } else {
                     // Enable the optgroup and its options if they were previously disabled
                     $optgroup.removeClass('disabled-optgroup');
-                    $optgroup.find('option').prop('disabled', false).removeClass('disabled-option');
+                    
+                    // Make sure to enable each option individually to handle any previously disabled ones
+                    $optgroup.find('option').each(function() {
+                        $(this).prop('disabled', false).removeClass('disabled-option');
+                    });
                 }
             }
         });

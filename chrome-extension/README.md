@@ -17,7 +17,8 @@
 
 - **Content Analysis**: Analyze any webpage or PDF document directly in your browser
 - **Contextual Understanding**: AI understands the content you're viewing for relevant responses
-- **Multiple AI Models**: Access models from OpenAI (GPT-3.5, GPT-4, GPT-4o, o1-mini, o3-mini), Google (Gemini 1.5 Pro, 1.5 Flash, 2.0 Flash), with xAI, DeepSeek, Anthropic coming soon
+- **Multiple AI Models**: Access models from OpenAI (GPT-3.5, GPT-4, GPT-4o, o1-mini, o3-mini), Perplexity (Sonar Reasoning, Reasoning Pro, Deep Research), Google (Gemini 1.5 Pro, 1.5 Flash, 2.0 Flash), with xAI, DeepSeek, Anthropic coming soon
+- **Web-Aware Citations**: Get cited sources with Perplexity's models for enhanced research and trust
 - **Conversation Persistence**: Conversations are saved per page for future reference
 - **Right-Click Integration**: Select text and ask CoTaskAI via context menu
 - **PDF Support**: Built-in PDF processing capability
@@ -78,6 +79,13 @@ CoTaskAI requires API keys to function:
 4. Go to the "Settings" tab
 5. Paste your OpenAI API key and click "Save Settings"
 
+### Perplexity API Key
+1. Create an account at [Perplexity](https://www.perplexity.ai/)
+2. Navigate to your account settings and generate an API key
+3. Click on the CoTaskAI extension icon
+4. Go to the "Settings" tab
+5. Paste your Perplexity API key and click "Save Settings"
+
 ### Gemini API Key
 1. Create an account at [Google AI Studio](https://aistudio.google.com/)
 2. Generate an API key in your account dashboard
@@ -96,6 +104,10 @@ CoTaskAI requires API keys to function:
      - GPT-4o
      - o1 Mini
      - o3 Mini
+   - Perplexity Models:
+     - Sonar Reasoning
+     - Sonar Reasoning Pro
+     - Sonar Deep Research
    - Gemini Models:
      - Gemini 1.5 Pro
      - Gemini 1.5 Flash
@@ -217,6 +229,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [OpenAI](https://openai.com/) for providing the API
+- [Perplexity](https://www.perplexity.ai/) for the Sonar API and web search capabilities
 - [Google AI](https://ai.google.dev/) for the Gemini API
 - [Bootstrap](https://getbootstrap.com/) for the responsive UI components
 - [Font Awesome](https://fontawesome.com/) for the icon library

@@ -1145,6 +1145,15 @@ textarea {
 }
 
 /* Setting item styles */
+.setting-notify {
+    background-color: var(--surface-color);
+    font-weight: bold;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    color: var(--danger-color);
+    border-radius: var(--radius-xl);
+}
+
 .setting-item {
     display: flex;
     flex-direction: column;
